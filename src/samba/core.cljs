@@ -42,7 +42,7 @@
 
    [:div.buttons
     (for [pat (keys pat/patterns)]
-      [:button {:key patm
+      [:button {:key pat
                 :on-click #(swap! state
                                   update :instruments
                                   merge
