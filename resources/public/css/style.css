@@ -1,2 +1,39 @@
-/* some style */
+* {
+    box-sizing:border-box;
+    padding:0;
+    margin:0;
+}
+div.instrument div.name {
+    background: #eee;
+    color:black;
+    width:8em;
+    border-bottom: 1px grey solid;
+}
 
+div.pattern {
+    border-left:1px grey solid;
+}
+
+div.pattern .note {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    border:1px grey solid;
+    margin:0.1em;
+}
+
+.note.sound {
+    background: orange;
+}
+
+.note.accent {
+    background: cyan;
+}
+
+div.pattern .note.beat-start {
+    border-left: 2px grey solid;
+}
+
+div.pattern .note.beat-end {
+    border-right: 2px grey solid;
+}

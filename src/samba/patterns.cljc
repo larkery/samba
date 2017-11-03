@@ -1,89 +1,134 @@
 (ns samba.patterns)
 
-(def samba-reggae-patterns
-  '{
-    :surdo-1
-    {1 [. _ _ _ | _ _ _ _
-        . _ _ _ | _ _ _ _]}
-    :surdo-2
-    {1 [_ _ _ _ | . _ _ _
-        _ _ _ _ | . _ _ _]}
-    :surdo-3
-    {1 [. _ _ _ | _ _ _ _
-        . . . . | . . . .
-        . _ _ _ | _ _ _ _
-        _ _ _ _ | . . . .
-        ]
-     ;; not sure if this is quite right
-     ;; 3:44 in video
-     ;; da da da da dum boop
-     ;; da da da da da da da dum boop boop
+(def instruments
+  [:M
+   :SN
+   :HP
+   :S1
+   :S2
+   :S3
+   :S4])
+
+(def patterns
+  (->
+   '{:R1 {:S1 [_ _ _ _ | . _ _ _]
+          :S2 [. _ _ _ | _ _ _ _]
+          :S3 [. _ _ _ | _ _ _ _ | . . . . | . . . .
+               . _ _ _ | _ _ _ _ | _ _ _ _ | . . . .]
+          :S4 [. _ _ _ | . _ ! _ | . _ _ _ | . ! _ !]
+          :SN [. . ! .]
+          :HP [! . . ! | . . ! . | . . ! . | ! . . .] ;; maybe?
+          }
+
+     :R2 {:S4 [_ _ _ _ | _ . . _ ]
+          :HP [! . . ! | . . ! . | . . ! . | . ! . .] ;; maybe?
+          }
+
+     :F1 {:S1 [. _ _ _ | _ _ _ _ | . _ . _ | _ _ _ _]
+          :S2 [. _ _ _ | _ _ _ _ | . _ . _ | _ _ _ _]
+          :S3 [_ _ _ _ | _ _ _ _ | _ _ _ . | . _ . _]
+          :S4 [. . . . | . _ _ _ | _ _ _ _ | _ _ _ _]
+          :SN [. . ! .]
+          ;; :HP ?????
+          }
+
+     :B1 {} ;; break one here
+
+     :BH {[:S1 :S2 :S3 :S4]
+          [! _ _ _ | _ _ _ _ | _ _ _ _ | _ _ _ _
+           ! _ _ _ | _ _ _ _ | _ _ _ _ | _ _ _ _
+           ! _ ! _ | ! _ _ ! | _ ! _ ! | ! _ _ _
+           3 . . . | . . . | . . . | . . . 4
+           ]
+          }
      }
-    :surdo-4
-    {1 [. _ _ _ | . _ ! _
-        . _ _ _ | . ! _ !]
 
-     2 [_ _ _ _ | _ . . _
-        _ _ _ _ | _ . . _]
-     }
-
-    :snare ;; with the off beat, forever
-    {1 [ . . ! . ]
-
-     }
-
-    :reppaniki
-    {1 [! . . ! | . . ! .
-        . . ! . | ! . . .]
-     ;; John called this samba-reggae pattern 1 on 30th oct ?
-     2 [! . . ! | . . ! .
-        . . ! . | . ! . .]
-     }
-
-    :breaks
-    {1 {} ;; break one goes here (da da da dum da da dum da da dum dum dum -> ba ba ba bum, same -> ba ba ba ba bum)
-     :horizontal
-     {:surdo
-      [!       |         |         |         |
-       ! _ _ _ | _ _ _ _ | _ _ _ _ | _ _ _ _
-       ! _ ! _ | ! _ _ ! | _ ! _ ! | ! _ _ _
-       3 . . . | . . . | . . . | . . . 4
-       ]
-
-      }
-     }
-    }
+   )
   )
 
-(defn expand-pattern
-  "Interprets a pattern of the form shown above.
-Result is a vector of notes, each having :time in beats and :accent true/false.
-Instrument should be silent the rest of the time."
-  [pattern]
-  (let [pattern
-        (if (= '| (last pattern)) pattern
-            (conj pattern '|))]
+
+
+(let [make-rests
+      (fn  [from beat time]
+        (into [] (for [i (range from (+ 1 time))]
+                   {:beat beat :note i
+                    :time time :type :rest}))
+        )
+
+      reducer
+      (fn [{pattern :pattern
+            time :time
+            beat :beat
+            note :note
+            skip :skip-bar}
+           command]
+        (if ('#{. _ !} command)
+          (let [next-note (+ note 1)]
+            {:pattern (conj pattern
+                            {:beat beat :time time :note note :type
+                             (case command _ :rest . :sound ! :accent)})
+             :note (if (> next-note time) 1 next-note)
+             :beat (if (> next-note time) (+ 1 beat) beat)
+             :skip-bar (> next-note time)
+             :time time})
+          ;; otherwise
+          (let [next-time (if (number? command) command time)]
+            ;; this is a bit wrong; missing rests is too big often.
+            {:pattern (if skip pattern
+                          (into [] (concat pattern (make-rests note beat time))))
+             :beat (+ 1 beat)
+             :note 1
+             :time next-time}
+            )))]
+
+  (defn complete-pattern [pattern]
     (:pattern
-     (reduce (fn [{beat :beat time :time pattern :pattern
-                   :as state} sym]
-               (case sym
-                 (. !)
-                 (assoc state
-                        :beat (+ beat (/ 1 time))
-                        :pattern (conj pattern {:time beat :accent (= sym '!)}))
+     (reduce reducer
+             {:pattern [] :time 4 :beat 1 :note 1 :skip-bar true}
+             pattern)))
 
-                 (_)
-                 (assoc state
-                        :beat (+ beat (/ 1 time)))
+  )
 
-                 (|)
-                 (assoc state :beat (int (Math/ceil beat)))
+(defn gcd
+  [a b]
+  (if (zero? b)
+    a
+    (recur b, (mod a b))))
 
-                 (if (number? sym)
-                   (assoc state
-                          :time sym ;; change time sig
-                          :beat (int (Math/ceil beat)) ;; also a bar line
-                          )
-                   state)))
-             {:beat 1 :time 4 :pattern []}
-             pattern))))
+(defn lcm
+  [a b]
+  (/ (* a b) (gcd a b)))
+
+(defn extend-patterns
+  [patterns]
+
+  (let [lcm (reduce lcm (map count (remove empty? (vals patterns))))]
+    (for [[i p] patterns]
+      [i (take lcm (cycle p))])))
+
+(defn complete-patterns
+  "Given a dictionary of patterns, complete them by:
+1. Expanding them to include any missing rests
+2. Cycling them until they are of equal length
+
+The notes in the pattern are agumented to include:
+:beat, the integral beat to which they belong
+:note, the subdivision to which they belong
+:time, the current time signature (denominator of note)
+:type [:rest :note :accent]
+
+The notes can't be scheduled directly from here because of fractional
+times."
+  [patterns]
+  (->>
+   ;; complete each pattern
+
+   (for [[i p] patterns]
+     [i (do (println "completing" i)
+            (complete-pattern p))])
+
+   extend-patterns
+
+   ;; cycle patterns to fit
+
+   (into {})))
