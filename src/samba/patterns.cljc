@@ -76,7 +76,7 @@
             ;; this is a bit wrong; missing rests is too big often.
             {:pattern (if skip pattern
                           (into [] (concat pattern (make-rests note beat time))))
-             :beat (+ 1 beat)
+             :beat (if skip beat (+ 1 beat))
              :note 1
              :time next-time}
             )))]
@@ -98,6 +98,13 @@
 (defn lcm
   [a b]
   (/ (* a b) (gcd a b)))
+
+(defn extend
+  ""
+  [pat len]
+
+  pat)
+
 
 (defn extend-patterns
   [patterns]
@@ -127,7 +134,7 @@ times."
      [i (do (println "completing" i)
             (complete-pattern p))])
 
-   extend-patterns
+   ;; extend-patterns
 
    ;; cycle patterns to fit
 

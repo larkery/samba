@@ -9,6 +9,7 @@
   :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/clojurescript "1.9.908"]
                  [org.clojure/core.async  "0.3.443"]
+                 [cljs-react-material-ui "0.2.48"]
                  [reagent "0.7.0"]
                  ]
 
