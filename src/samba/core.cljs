@@ -23,76 +23,60 @@
                  (pattern-for-everyone :R1)
                  }))
 
-(def machine (sound/create-machine
-              {:S1 "/fx/kick-acoustic01.wav"
-               :S2 "/fx/kick-acoustic02.wav"
-               :S3 "/fx/tom-short.wav"
-               :S4 "/fx/snare-vinyl01.wav"
-               :SN "/fx/snare-dist01.wav"
-               :HP "/fx/snare-dist02.wav"
-               }))
+(defonce machine (sound/create-machine
+                  {:S1 (sound/beep :freq :D2 :length 2)
+                   :S2 (sound/beep :freq :F2 :length 2)
+                   :S3 (sound/fuzz (sound/squares) :delta-time 0.01)
+                   :S4 (sound/fuzz (sound/squares :freq 60) :delta-time 0.01)
+                                        ;               :SN "/fx/snare-vinyl01.wav"
+                   ;;:HP "/fx/snare-dist03.wav"
+                   }))
+
+(sound/set-patterns! machine (:instruments @state))
 
 (defn classes [& cs] (string/join " " (filter identity cs)))
 
 (defn instrument-pattern
-  [{key :key} instrument pattern extend-to]
-  (let [pattern (pat/extend pattern extend-to)]
-    [ui/paper
-     {:key key}
+  [{key :key} instrument pattern]
+  [ui/paper
+   {:key key}
 
-     [:div.pattern
-      [:span.instrument-name
-       {:style {:width :40px
-                :display :inline-block
-                :text-align :right
-                :margin-right :-40px}}
-       instrument]
-
-      (let [by-beat (group-by :beat pattern)
-            beats (sort (keys by-beat))
-            ]
-        (for [beat beats]
-          (let [notes-in-beat (by-beat beat)]
-            [:span {:key beat :style {:border-left
-                                      (when (> beat 1) "1px black solid")
-                                      :margin-left :45px
-                                      :display :inline-flex
-                                      :width :90px
-                                      :padding 0}
-                    }
-             (for [{type :type note :note} notes-in-beat]
-               [:span {:key note
-                       :style {:flex-grow 1 :flex-basis 0
-                               :text-align :center :margin :3px}}
-                (case type
-                  :accent "⬤"
-                  :sound "⭘"
-                  :rest "-"
-                  )]
-
-               )
-
-
-             ]
-            )
-          )
-        )
-
-      ]
-     ])
-  )
+   [:div.pattern
+    {:style {:display :flex}}
+    [:span.instrument-name
+     {:style {:flex-shrink 0 :margin-right :4px :width :40px :text-align :right}
+      :on-click #(sound/play! machine instrument)
+      :role :button
+      }
+     instrument]
+    [:span.notes {:style {:display :inline-flex :flex-wrap :wrap}}
+     (let [by-beat (group-by :beat pattern)
+           beats (sort (keys by-beat))
+           ]
+       (for [beat beats]
+         (let [notes-in-beat (by-beat beat)]
+           [:span {:key beat :style {:border-left "1px black solid"
+                                     :display :inline-flex
+                                     :width :100px
+                                     :padding 0}
+                   }
+            (for [{type :type note :note} notes-in-beat]
+              [:span {:key note
+                      :style {:flex-grow 1 :flex-basis :1em
+                              :text-align :center :margin :3px}}
+               (case type :accent "⬤" :sound "⭘" :rest "-")
+               ])])))]]])
 
 (reagent/render-component
  [ui/mui-theme-provider
   {:mui-theme (ui-core/get-mui-theme)}
   [ui/paper {:style {:margin :1em}}
+   [ui/raised-button {:label "Play"
+                      :on-click #(sound/play! machine)}]
+   [ui/raised-button {:label "Stop"
+                      :on-click #(sound/stop! machine)}]
 
-   (let [longest-pattern (reduce pat/lcm
-                                 (map (fn [p] (apply max (map :beat p)))
-                                      (vals (:instruments @state))))
-         ]
-     (println "Extend patterns to " longest-pattern)
-     (for [[i p] (:instruments @state)]
-       [instrument-pattern {:key i} i p longest-pattern]))]]
+   (for [[i p] (:instruments @state)]
+     [instrument-pattern {:key i} i p])]]
 
  (. js/document (getElementById "app")))

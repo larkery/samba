@@ -103,15 +103,29 @@
   ""
   [pat len]
 
-  pat)
+  (let [pat-beats (group-by :beat pat)
+        max-beat (apply max (keys pat-beats))
+        output
+        (apply concat
+               (for [i (range 0 len)]
+                 (let [beats-i (pat-beats (+ 1 (mod i max-beat)))]
+                   (for [note beats-i]
+                     (assoc note :beat (+ 1 i))))))
+        ]
+    output
+    )
+  )
 
 
 (defn extend-patterns
   [patterns]
 
-  (let [lcm (reduce lcm (map count (remove empty? (vals patterns))))]
+  (let [beat-maxima (remove #{0}
+                            (for [[_ ns] patterns] (apply max (map :beat ns))))
+        max-beat (reduce lcm beat-maxima)
+        ]
     (for [[i p] patterns]
-      [i (take lcm (cycle p))])))
+      [i (extend p max-beat)])))
 
 (defn complete-patterns
   "Given a dictionary of patterns, complete them by:
@@ -130,11 +144,9 @@ times."
   (->>
    ;; complete each pattern
 
-   (for [[i p] patterns]
-     [i (do (println "completing" i)
-            (complete-pattern p))])
+   (for [[i p] patterns] [i (complete-pattern p)])
 
-   ;; extend-patterns
+   extend-patterns
 
    ;; cycle patterns to fit
 
