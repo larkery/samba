@@ -3,37 +3,37 @@
     padding:0;
     margin:0;
 }
-div.instrument div.name {
-    background: #eee;
-    color:black;
-    width:8em;
-    border-bottom: 1px grey solid;
+
+.drum-line {
+    display: inline-flex;
+    flex-wrap: wrap
 }
 
-div.pattern {
-    border-left:1px grey solid;
+.drum-line .beat {
+    border-left: 1px black solid;
+    display: inline-flex;
+    width: 100px;
 }
 
-div.pattern .note {
-    width: 1em;
-    height: 1em;
-    display: inline-block;
-    border:1px grey solid;
-    margin:0.1em;
+.drum-line .beat.extended {
+    color: grey;
+    background: #f8f8f8;
 }
 
-.note.sound {
-    background: orange;
+.drum-line .beat .note {
+    flex-grow: 1;
+    flex-basis: 1em;
+    text-align: center;
+    margin:2px;
 }
 
-.note.accent {
-    background: cyan;
+.pattern-header {
+    width: 7em;
+    flex-grow : 0;
+    flex-shrink: 0;
 }
 
-div.pattern .note.beat-start {
-    border-left: 2px grey solid;
-}
-
-div.pattern .note.beat-end {
-    border-right: 2px grey solid;
+.pattern-container {
+    padding-left: 1.5em;
+    display: flex;
 }

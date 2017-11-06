@@ -1,9 +1,9 @@
 (ns samba.core
   (:require [reagent.core :as reagent]
             [samba.patterns :as pat]
-            [samba.sound :as sound]
             [clojure.string :as string]
-
+            [samba.sequencer :as sequencer]
+            [samba.sound :as sound]
             [cljsjs.material-ui]
             [cljs-react-material-ui.core :as ui-core]
             [cljs-react-material-ui.reagent :as ui]
@@ -14,69 +14,151 @@
 
 (defn on-js-reload [])
 
-(defn pattern-for-everyone [pattern-name]
-  ;; TODO do the cycle completion thing neater
-  (pat/complete-patterns (pat/patterns pattern-name)))
-
-(defonce state (reagent/atom
-                {:instruments
-                 (pattern-for-everyone :R1)
-                 }))
-
-(defonce machine (sound/create-machine
-                  {:S1 (sound/beep :freq :D2 :length 2)
-                   :S2 (sound/beep :freq :F2 :length 2)
-                   :S3 (sound/fuzz (sound/squares) :delta-time 0.01)
-                   :S4 (sound/fuzz (sound/squares :freq 60) :delta-time 0.01)
-                                        ;               :SN "/fx/snare-vinyl01.wav"
-                   ;;:HP "/fx/snare-dist03.wav"
-                   }))
-
-(sound/set-patterns! machine (:instruments @state))
-
 (defn classes [& cs] (string/join " " (filter identity cs)))
 
-(defn instrument-pattern
-  [{key :key} instrument pattern]
-  [ui/paper
-   {:key key}
+(def initial-state
+  {:playing false
+   :instruments
+   (let [;; turns the patterns map the other way around
+         instrument-patterns
+         (reduce
+          (fn [acc [instrument-name pattern-name]]
+            (let [pattern (or (get-in pat/patterns [pattern-name instrument-name])
+                              (get-in pat/patterns [pattern-name :ALL]))
+                  ]
+              (if (seq pattern)
+                (assoc-in acc [instrument-name pattern-name]
+                          (pat/complete-pattern pattern))
+                acc)))
+          {}
+          (for [instrument pat/instruments
+                pattern-name (keys pat/patterns)]
+            [instrument pattern-name]))
+         ]
+     (into {}
+           (for [instrument pat/instruments]
+             [instrument
+              {:name (pat/names instrument)
+               :mute false
+               :pattern (get-in instrument-patterns [instrument :R1])
+               :patterns (instrument-patterns instrument)}]
+             )))}
+  )
 
-   [:div.pattern
-    {:style {:display :flex}}
-    [:span.instrument-name
-     {:style {:flex-shrink 0 :margin-right :4px :width :40px :text-align :right}
-      :on-click #(sound/play! machine instrument)
-      :role :button
-      }
-     instrument]
-    [:span.notes {:style {:display :inline-flex :flex-wrap :wrap}}
-     (let [by-beat (group-by :beat pattern)
-           beats (sort (keys by-beat))
+(defonce state (reagent/atom initial-state))
+
+(defonce machine (sequencer/create-sequencer))
+
+(sequencer/set-fx!
+ machine
+ {:S1 (sound/beep :freq :A2 :length 2.5)
+  :S2 (sound/beep :freq :F2 :length 2.5)
+  ;;:S3 (sound/beep :freq :A3 :length 1 :shape :triangle)
+  ;;:S4 (sound/fuzz (sound/beep :freq :F3 :length 1))
+  ;;:SN (sound/squares)
+  :HP (sound/beep :freq :A4 :length 1)
+  }
+ )
+
+(defn update-sequencer []
+  (let [{instruments :instruments
+         playing :playing} @state]
+    (println "Updating sequencer!")
+    (sequencer/set-patterns!
+     machine
+     (into {} (for [[i {pat :pattern}] instruments] [i pat])))
+    (sequencer/set-playing! machine playing)
+    ))
+
+(defonce tracker (reagent/track! update-sequencer))
+
+(defn drum-line [{key :key
+                  extended-from :extended-from} pattern]
+  [:div.drum-line
+   {:key key}
+   (let [by-beat (group-by :beat pattern)
+         beats (sort (keys by-beat))]
+     (for [beat beats]
+
+       [:span.beat {:key beat
+                    :class (when (and extended-from (> beat extended-from)) "extended")
+                    }
+        (let [notes (by-beat beat)]
+          (for [{type :type note :note} notes]
+            [:span.note {:key note}
+             (case type :accent "⬤" :sound "⭘" :rest "-")]))]))])
+
+
+(defn instrument-block [{key :key extend-to :extend-to} instrument-state]
+  ;; TODO maybe repeat drum line with ghostly patterns for the repeat blocks
+  (let [expanded (reagent/atom false)]
+    (fn [{key :key extend-to :extend-to} instrument-state]
+      (let [{pattern :pattern
+             patterns :patterns
+             instrument-name :name} @instrument-state
+
+            current-pattern-name
+            (or (->> patterns
+                     (filter (fn [[n p]] (= p pattern)))
+                     (first)
+                     (first))
+                "??")
+            ]
+        [ui/paper
+         {:key key}
+         [:div.pattern-container
+
+          [:div.pattern-header {:on-click #(swap! expanded not)
+                                :role :button}
+           [:b instrument-name] " " [:em current-pattern-name]
            ]
-       (for [beat beats]
-         (let [notes-in-beat (by-beat beat)]
-           [:span {:key beat :style {:border-left "1px black solid"
-                                     :display :inline-flex
-                                     :width :100px
-                                     :padding 0}
-                   }
-            (for [{type :type note :note} notes-in-beat]
-              [:span {:key note
-                      :style {:flex-grow 1 :flex-basis :1em
-                              :text-align :center :margin :3px}}
-               (case type :accent "⬤" :sound "⭘" :rest "-")
-               ])])))]]])
+
+          [drum-line {:extended-from (apply max (map :beat pattern))} (pat/extend pattern extend-to)]]
+         (when @expanded
+           [:div {:style {:border-top "1px grey solid"
+                          :border-bottom "1px grey solid"}}
+            (for [[pattern-name pat] patterns
+                  :when (not (= pattern-name current-pattern-name))]
+              [:div.pattern-container {:key pattern-name
+                                       :style {:background :#fef}}
+               [:div.pattern-header
+                [:button {:on-click #(swap! instrument-state assoc :pattern pat)} "Load"]
+                [:em pattern-name]]
+
+               [drum-line {:key pattern-name} pat]]
+              )
+            ])
+         ])))
+  )
+
+(defn main-component []
+  [ui/paper
+   [ui/toolbar
+    [ui/toolbar-group "Tom's Samba Drumkit"]
+    [ui/toolbar-group
+     [ui/raised-button {:label "Play/pause"
+                        :on-click #(swap! state update :playing not)}]]]
+
+   (let [max-beats
+         (map (comp
+               (partial apply max)
+               (partial map :beat)
+               :pattern)
+              (vals (:instruments @state)))
+
+         loop-length
+         (reduce pat/lcm (filter #(< 0 %) max-beats))
+         ]
+     (for [instrument pat/instruments]
+       [instrument-block {:key instrument :extend-to loop-length}
+        (reagent/cursor state [:instruments instrument])]))
+   ]
+  )
 
 (reagent/render-component
  [ui/mui-theme-provider
   {:mui-theme (ui-core/get-mui-theme)}
-  [ui/paper {:style {:margin :1em}}
-   [ui/raised-button {:label "Play"
-                      :on-click #(sound/play! machine)}]
-   [ui/raised-button {:label "Stop"
-                      :on-click #(sound/stop! machine)}]
+  [main-component]]
 
-   (for [[i p] (:instruments @state)]
-     [instrument-pattern {:key i} i p])]]
 
  (. js/document (getElementById "app")))

@@ -9,6 +9,10 @@
    :S3
    :S4])
 
+(def names
+  {:S1 "1st" :S2 "2nd" :S3 "3rd" :S4 "4th"
+   :HP "Heppaniki" :SN "Snare" :M "Maestro"})
+
 (def patterns
   (->
    '{:R1 {:S1 [_ _ _ _ | . _ _ _]
@@ -17,11 +21,13 @@
                . _ _ _ | _ _ _ _ | _ _ _ _ | . . . .]
           :S4 [. _ _ _ | . _ ! _ | . _ _ _ | . ! _ !]
           :SN [. . ! .]
-          :HP [! . . ! | . . ! . | . . ! . | ! . . .] ;; maybe?
+          :HP [! . . ! | . . ! . | . . ! . | . ! . .]
           }
 
-     :R2 {:S4 [_ _ _ _ | _ . . _ ]
-          :HP [! . . ! | . . ! . | . . ! . | . ! . .] ;; maybe?
+     :R2 {:S4 [_ _ _ _ | _ . . _ ]}
+
+     :R3 {:HP [! . . ! | . . ! . | . . ! . | ! . . .]
+
           }
 
      :F1 {:S1 [. _ _ _ | _ _ _ _ | . _ . _ | _ _ _ _]
@@ -32,7 +38,21 @@
           ;; :HP ?????
           }
 
-     :B1 {} ;; break one here
+     :B1 {:M
+          ;; diddly da da da
+          [8 . . - . - . - . -. 4 . . . .
+           8 . . - . - . - . -. 4 - - - -
+           ] ;; diddly da da da
+
+          ;; I have left off the final DUM on the break
+          ;; because it goes in the pattern
+          :ALL [- - - - | . . . . | - - - - | . . . . ]
+
+          } ;; break one here
+
+     :B2 {:ALL
+          [. . - . | - . - . | - . - . | - . - .] ;; extra dum on the end
+          }
 
      :BH {[:S1 :S2 :S3 :S4]
           [! _ _ _ | _ _ _ _ | _ _ _ _ | _ _ _ _
@@ -97,22 +117,29 @@
 
 (defn lcm
   [a b]
-  (/ (* a b) (gcd a b)))
+  (if (or (zero? a) (zero? b))
+    (max a b)
+    (/ (* a b) (gcd a b))))
 
 (defn extend
   ""
   [pat len]
-
-  (let [pat-beats (group-by :beat pat)
-        max-beat (apply max (keys pat-beats))
-        output
-        (apply concat
-               (for [i (range 0 len)]
-                 (let [beats-i (pat-beats (+ 1 (mod i max-beat)))]
-                   (for [note beats-i]
-                     (assoc note :beat (+ 1 i))))))
-        ]
-    output
+  (if (seq pat)
+    (let [pat-beats (group-by :beat pat)
+          max-beat (apply max (keys pat-beats))
+          output
+          (apply concat
+                 (for [i (range 0 len)]
+                   (let [beats-i (pat-beats (+ 1 (mod i max-beat)))]
+                     (for [note beats-i]
+                       (assoc note :beat (+ 1 i))))))
+          ]
+      output
+      )
+    (extend (for [n (range 4)]
+              {:beat 1 :note (+ 1 n)
+               :type :rest :time 4}
+              ) len)
     )
   )
 

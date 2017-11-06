@@ -2,8 +2,15 @@
   (:require [goog.net.XhrIo :as xhr])
   )
 
-(defn create-oscillator [c t]
-  (let [osc (.createOscillator c)]
+(defonce *context*
+  (let [constructor (or js/window.AudioContext
+                        js/window.webkitAudioContext)]
+    (constructor.)))
+
+(defn output [] (.-destination *context*))
+
+(defn create-oscillator [t]
+  (let [osc (.createOscillator *context*)]
     (set! (.. osc -type) (name t))
     osc))
 
@@ -16,8 +23,8 @@
 
       (.setValueAtTime audio-node value time))))
 
-(defn create-gain [context & plan]
-  (let [gain (.createGain context)]
+(defn create-gain [& plan]
+  (let [gain (.createGain *context*)]
     (schedule-values (.-gain gain) plan)
     gain))
 
@@ -57,13 +64,13 @@
                     length 1}}]
 
   (let [freq (if (keyword? freq) (scale freq) freq)]
-    (fn [context now g0]
+    (fn [now g0]
       (let [end (+ now length)
-            osc (create-oscillator context shape)
-            gain (create-gain context [now g0] [end 0.001 env])
+            osc (create-oscillator shape)
+            gain (create-gain [now g0] [end 0.001 env])
             ]
         (set! (.. osc -frequency -value) freq)
-        (connect osc gain (.-destination context))
+        (connect osc gain (output))
         (.start osc now)
         (.stop osc end)))))
 
@@ -71,11 +78,12 @@
                   :or {freq 40
                        length 0.1
                        ratios [2 3 4.16 5.43 6.79 8.21]}}]
-  (fn [context t g]
-    (let [gain (create-gain context [t g] [(+ t length) 0.0001 :exp])]
-      (connect gain (.-destination context))
+  (fn [t g]
+    (let [g (/ g (count ratios))
+          gain (create-gain [t g] [(+ t length) 0.0001 :exp])]
+      (connect gain (output))
       (doseq [r ratios]
-        (let [osc (create-oscillator context :square)
+        (let [osc (create-oscillator :square)
               freq (* freq r)
               ]
           (set! (.. osc -frequency -value) freq)
@@ -89,17 +97,17 @@
                     :or {f1 120
                          f2 50
                          t 0.5}}]
-  (fn [context now gain]
-    (let [dest (.-destination context)
+  (fn [now gain]
+    (let [dest (output)
           end (+ now t)
 
-          tri (create-oscillator context :triangle)
-          sine (create-oscillator context :sine)
+          tri (create-oscillator :triangle)
+          sine (create-oscillator :sine)
 
-          g-tri (create-gain context [now 1] [end 0.001 :exp])
-          g-sine (create-gain context [now 1] [end 0.001 :exp])
+          g-tri (create-gain [now 1] [end 0.001 :exp])
+          g-sine (create-gain [now 1] [end 0.001 :exp])
 
-          g-multi (create-gain context [now gain])
+          g-multi (create-gain [now gain])
           ]
 
       (schedule-values
@@ -120,126 +128,14 @@
       (.stop sine end)
       )))
 
-(defn sample-drum [sample-buffer]
-  (fn [context now gain]
-    (println "play a drum" sample-buffer now gain)
-    (let [dest (.-destination context)
-          source (.createBufferSource context)
-          g-samp (create-gain context [now gain])]
-
+(defn fx-sample [sample-buffer]
+  (fn [now gain]
+    (let [dest (output)
+          source (.createBufferSource *context*)
+          g-samp (create-gain [now gain])]
       (set! (.. source -buffer) sample-buffer)
       (connect source g-samp dest)
       (.start source now)
       )))
 
-(defn create-machine [samples]
-  (let [audio-context (or js/window.AudioContext
-                          js/window.webkitAudioContext)
-
-        audio-context (audio-context.)
-
-        machine
-        (atom {:context audio-context
-               :patterns {}
-               :queue ()
-               :samples {}
-               :tempo 80
-               :playing false
-               })]
-    ;; queue up loading of samples
-    (doseq [[instrument rule] samples]
-      (cond
-        (fn? rule)
-        (swap! machine assoc-in [:samples instrument]
-               rule)
-
-        (string? rule)
-        (let [url rule
-              x (goog.net.XhrIo.)]
-          (.setResponseType x xhr/ResponseType.ARRAY_BUFFER)
-          (.listen
-           x
-           goog.net.EventType.COMPLETE
-           (fn [e]
-             (let [wav-data (.. e -target -xhr_ -response)]
-               (.decodeAudioData
-                audio-context wav-data
-                (fn [sound]
-                  (println "Loaded sample for " instrument " from " url)
-                  (swap! machine assoc-in [:samples instrument]
-                         (sample-drum sound)
-                         ))))))
-          (.send x url))
-        )
-      )
-
-    machine
-    ))
-
-(defn current-time [context] (.-currentTime context))
-
-(defn play-sample! [machine sample]
-  (let [{c :context s :samples} @machine]
-    ((s sample) c (current-time c) 1)
-    ))
-
-(defn play-one-loop [machine start & instruments]
-  (let [{samples :samples
-         patterns :patterns
-         context :context
-         tempo :tempo} @machine
-
-        instruments (into #{} (or instruments (keys patterns)))
-        duration (atom 0)
-        ]
-    (doseq [[i pat] patterns]
-      (when (instruments i)
-
-        (let [sample (samples i)]
-
-          (when sample
-            (doseq [{beat :beat
-                     time :time
-                     note :note
-                     type :type
-                     :as n} pat]
-              (when-not (= type :rest)
-
-                (let [time (* 60 (/ (+ (- beat 1) (/ note time)) tempo))]
-                  (swap! duration max beat)
-                  (sample context (+ start time) (case type :sound 0.5 :accent 0.75))
-                  ))
-
-              ))))
-      )
-    (+ start (/ (* 60 @duration) tempo))
-    ))
-
-(defn start-playing [machine]
-  (let [next-loop
-        (atom (current-time (:context @machine)))
-
-        trigger
-        (fn trigger []
-          (let [st @machine]
-            (when (:playing st)
-              (let [now @next-loop
-                    next (play-one-loop machine now)
-                    delta (- next now)]
-                (reset! next-loop next)
-                (js/setTimeout trigger (* 1000 (- delta 1)))))))
-        ]
-    (trigger)))
-
-
-(defn play! [machine & instruments]
-  (swap! machine assoc :playing true)
-  (start-playing machine))
-
-(defn stop! [machine]
-  (swap! machine assoc :playing false))
-
-(defn set-patterns! [machine patterns]
-  (swap! machine assoc :patterns patterns))
-
-(defn mute! [machine instrument])
+(defn current-time [] (.-currentTime *context*))
