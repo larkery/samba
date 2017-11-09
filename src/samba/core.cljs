@@ -46,7 +46,7 @@
   )
 
 (defonce state (reagent/atom initial-state))
-
+(defonce live-notes (reagent/atom #{}))
 (defonce machine (sequencer/create-sequencer))
 
 (sequencer/set-fx!
@@ -67,13 +67,21 @@
     (sequencer/set-patterns!
      machine
      (into {} (for [[i {pat :pattern}] instruments] [i pat])))
-    (sequencer/set-playing! machine playing)
-    ))
+    (sequencer/set-playing!
+     machine playing
+     (fn [live]
+       (reset! live-notes
+               (into #{}
+                     (map select-keys
+                          live
+                          (repeat [:beat :note :time]))))
+       ))))
 
 (defonce tracker (reagent/track! update-sequencer))
 
 (defn drum-line [{key :key
-                  extended-from :extended-from} pattern]
+                  extended-from :extended-from} pattern
+                 is-highlight]
   [:div.drum-line
    {:key key}
    (let [by-beat (group-by :beat pattern)
@@ -84,15 +92,18 @@
                     :class (when (and extended-from (> beat extended-from)) "extended")
                     }
         (let [notes (by-beat beat)]
-          (for [{type :type note :note} notes]
-            [:span.note {:key note}
+          (for [{type :type note :note time :time} notes]
+            [:span.note {:key note
+                         :style (when (is-highlight {:beat beat :note note :time time})
+                                  {:color :red})
+                         }
              (case type :accent "⬤" :sound "⭘" :rest "-")]))]))])
 
 
-(defn instrument-block [{key :key extend-to :extend-to} instrument-state]
+(defn instrument-block [{key :key extend-to :extend-to live-notes :live-notes} instrument-state]
   ;; TODO maybe repeat drum line with ghostly patterns for the repeat blocks
   (let [expanded (reagent/atom false)]
-    (fn [{key :key extend-to :extend-to} instrument-state]
+    (fn [{key :key extend-to :extend-to live-notes :live-notes} instrument-state]
       (let [{pattern :pattern
              patterns :patterns
              instrument-name :name} @instrument-state
@@ -113,7 +124,11 @@
            [:b instrument-name] " " [:em current-pattern-name]
            ]
 
-          [drum-line {:extended-from (apply max (map :beat pattern))} (pat/extend pattern extend-to)]]
+          [drum-line {:extended-from (apply max (map :beat pattern))}
+           (pat/extend pattern extend-to)
+           live-notes
+           ]]
+
          (when @expanded
            [:div {:style {:border-top "1px grey solid"
                           :border-bottom "1px grey solid"}}
@@ -122,10 +137,10 @@
               [:div.pattern-container {:key pattern-name
                                        :style {:background :#fef}}
                [:div.pattern-header
-                [:button {:on-click #(swap! instrument-state assoc :pattern pat)} "Load"]
+                [:button {:on-click #(swap! instrument-state assoc :pattern pat)} "Cue!"]
                 [:em pattern-name]]
 
-               [drum-line {:key pattern-name} pat]]
+               [drum-line {:key pattern-name} pat (constantly false)]]
               )
             ])
          ])))
@@ -136,7 +151,7 @@
    [ui/toolbar
     [ui/toolbar-group "Tom's Samba Drumkit"]
     [ui/toolbar-group
-     [ui/raised-button {:label "Play/pause"
+     [ui/raised-button {:label (if (:playing @state) "Stop" "Play")
                         :on-click #(swap! state update :playing not)}]]]
 
    (let [max-beats
@@ -148,9 +163,16 @@
 
          loop-length
          (reduce pat/lcm (filter #(< 0 %) max-beats))
+
+         live-notes (into #{}
+                          (map (fn [m] (update m :beat #(+ 1 (mod (- % 1) loop-length))))
+                               @live-notes))
          ]
+
      (for [instrument pat/instruments]
-       [instrument-block {:key instrument :extend-to loop-length}
+       [instrument-block {:key instrument :extend-to loop-length
+                          :live-notes live-notes
+                          }
         (reagent/cursor state [:instruments instrument])]))
    ]
   )

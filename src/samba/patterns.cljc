@@ -40,8 +40,7 @@
 
      :B1 {:M
           ;; diddly da da da
-          [8 . . - . - . - . -. 4 . . . .
-           8 . . - . - . - . -. 4 - - - -
+          [8 . . . . - . - .
            ] ;; diddly da da da
 
           ;; I have left off the final DUM on the break
@@ -61,6 +60,10 @@
            3 . . . | . . . | . . . | . . . 4
            ]
           }
+
+     :Quiet {:ALL
+             [ - ]
+             }
      }
 
    )

@@ -128,14 +128,31 @@
       (.stop sine end)
       )))
 
-(defn fx-sample [sample-buffer]
-  (fn [now gain]
-    (let [dest (output)
-          source (.createBufferSource *context*)
-          g-samp (create-gain [now gain])]
-      (set! (.. source -buffer) sample-buffer)
-      (connect source g-samp dest)
-      (.start source now)
-      )))
+(defn sample [url]
+  (let [buffer (atom nil)
+        request (goog.net.XhrIo.)]
+
+    (.setResponseType request xhr/ResponseType.ARRAY_BUFFER)
+    (.listen request
+             goog.net.EventType.COMPLETE
+             (fn [e]
+               (.decodeAudioData
+                *context*
+                (.. e -target -xhr_ -response)
+                #(reset! buffer %))))
+
+    (.send request url)
+
+    (fn [now gain]
+      (if-let [sample-buffer @buffer]
+        (let [dest (output)
+              source (.createBufferSource *context*)
+              g-samp (create-gain [now gain])]
+          (set! (.. source -buffer) sample-buffer)
+          (connect source g-samp dest)
+          (.start source now))
+        (println "Missing sample for" url now gain)
+        ))
+    ))
 
 (defn current-time [] (.-currentTime *context*))

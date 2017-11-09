@@ -8,16 +8,15 @@
 (defn create-sequencer []
   (atom {:fx {}
          :patterns {}
-         :tempo 60
+         :tempo 70
          :playing false
          :animations ()}))
 
-(defn- run-sequence [sequencer beat beat-time start-time]
+(defn- run-sequence [sequencer beat beat-time animations]
   (let [{playing :playing
          tempo :tempo
          fx :fx
          patterns :patterns
-         animations :animations
          } @sequencer]
 
     (when-not playing (println "Stopping playback"))
@@ -43,12 +42,16 @@
                         sound-time (* fraction seconds-per-beat)
                         gain (case type :accent 1 :sound 0.6)]
                     ;; schedule to play this note
-                    (swap! sequencer
-                           update :animations
-                           conj {:animation-time (+ beat-time sound-time)
-                                 :beat beat :time time :note note}
-                           )
-                    (effect (+ sound-time beat-time) gain))
+                    (swap! animations
+                           ;; todo can we put these into a queue or something
+                           conj
+                           {:animation-time (+ beat-time sound-time)
+                            :beat beat :time time :note note
+                            :instrument instrument})
+
+                    (comment
+                      (effect (+ sound-time beat-time) gain)))
+
                   )))))
         ;; play next beat later with a bit of slack
         (let [next-beat-time (+ seconds-per-beat beat-time)]
@@ -56,32 +59,55 @@
           #(run-sequence sequencer
                          (+ 1 beat)
                          next-beat-time
-                         start-time)
+                         animations)
           (- (* 1000 (- next-beat-time (sound/current-time))) 400)
           ))))))
 
-(defn- play [sequencer upd]
+(defn- play [sequencer upd set-highlights]
   (let [was-playing (:playing @sequencer)]
     (swap! sequencer update :playing upd)
     (when (and (:playing @sequencer) (not was-playing))
-      (let [now (sound/current-time)]
-        (swap! sequencer assoc :play-start (js/performance.now))
-
-        (run-sequence sequencer 1 now now)
+      (let [now (sound/current-time)
+            animations (atom ())
+            frame-start (js/performance.now)
+            ]
+        (run-sequence sequencer 1 now animations)
+        ;; also trigger animatoins
         (js/requestAnimationFrame
-         (fn paint [animation-time]
-           (let [{playing :playing
-                  animations :animations} @sequencer]
+         (fn paint [frame-time]
+           (let [{playing :playing tempo :tempo} @sequencer
+                 one-beat-time (/ 60 tempo)
+                 ]
              (when playing
-               (js/requestAnimationFrame paint)))))
+               (swap! animations
+                      (fn [events]
+                        (let [wall-time (/ (- frame-time frame-start) 1000)
+
+                              recent? (fn [{note-time :time
+                                            t :animation-time :as evt}]
+                                        (let [dtt (/ one-beat-time note-time)
+                                              dt (- (- t now) wall-time)]
+                                          (< (- dtt) dt)))
+
+                              past? (fn [{t :animation-time :as evt}]
+                                        (let [dt (- (- t now) wall-time)]
+                                          (< dt 0)))
+
+                              keep (filter recent? events)
+                              ]
+                          (set-highlights (filter past? keep))
+                          (into () keep))
+                        ))
+               (js/requestAnimationFrame paint))
+             )))
         ))))
 
 
-(defn set-playing! [sequencer playing]
-  (play sequencer (constantly playing)))
+(defn set-playing! [sequencer playing render]
+  (play sequencer (constantly playing) render))
 
 (defn toggle-playing! [sequencer]
-  (play sequencer not))
+  (play sequencer not (fn [])))
 
 (defn set-patterns! [sequencer patterns]
   (swap! sequencer assoc :patterns patterns))
