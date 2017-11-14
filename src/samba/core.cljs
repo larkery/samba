@@ -51,12 +51,13 @@
 
 (sequencer/set-fx!
  machine
- {:S1 (sound/beep :freq :A2 :length 2.5)
+ {:S1 (sound/beep :freq :C2 :length 2.5)
   :S2 (sound/beep :freq :F2 :length 2.5)
-  ;;:S3 (sound/beep :freq :A3 :length 1 :shape :triangle)
-  ;;:S4 (sound/fuzz (sound/beep :freq :F3 :length 1))
-  ;;:SN (sound/squares)
-  :HP (sound/beep :freq :A4 :length 1)
+  :S3 (sound/beep :freq :B3 :length 1.5 :shape :triangle)
+  :S4 (sound/beep :freq :A3 :length 2 :shape :triangle)
+  :SN (sound/vol (sound/sample "/fx/snare-vinyl02.wav") 0.1)
+  :HP (sound/vol (sound/sample "/fx/snare-dist02.wav") 0.1)
+  :M  (sound/squares)
   }
  )
 
@@ -94,10 +95,12 @@
         (let [notes (by-beat beat)]
           (for [{type :type note :note time :time} notes]
             [:span.note {:key note
-                         :style (when (is-highlight {:beat beat :note note :time time})
-                                  {:color :red})
+                         :style {:color (when (is-highlight {:beat beat :note note :time time})
+                                          :red)
+                                 :border (when (= type :accent) "1px #ccc solid")
+                                 }
                          }
-             (case type :accent "⬤" :sound "⭘" :rest "-")]))]))])
+             (case type :accent "•" :sound "•" :rest "-")]))]))])
 
 
 (defn instrument-block [{key :key extend-to :extend-to live-notes :live-notes} instrument-state]
@@ -137,7 +140,10 @@
               [:div.pattern-container {:key pattern-name
                                        :style {:background :#fef}}
                [:div.pattern-header
-                [:button {:on-click #(swap! instrument-state assoc :pattern pat)} "Cue!"]
+                [:button {:on-click #(do
+                                       (swap! expanded not)
+                                       ;; TODO make the cue button actually cue up rather than swapping now
+                                       (swap! instrument-state assoc :pattern pat))} "Cue!"]
                 [:em pattern-name]]
 
                [drum-line {:key pattern-name} pat (constantly false)]]
@@ -146,26 +152,52 @@
          ])))
   )
 
+(defn structure [thing]
+  (cond
+    (map? thing)
+    [:div
+     (for [[k v] thing]
+       [:div {:style {:margin-left :1em}
+              :key k}
+        [:b (str k)]
+        [structure v]])]
+
+    (or (seq? thing)
+        (vector? thing)
+        )
+    [structure
+     (into {} (map-indexed vector thing))
+     ]
+
+
+
+    :otherwise
+    [:div (str thing)]
+
+
+    )
+  )
+
 (defn main-component []
   [ui/paper
    [ui/toolbar
-    [ui/toolbar-group "Tom's Samba Drumkit"]
+    [ui/toolbar-group "Instruments"]
     [ui/toolbar-group
      [ui/raised-button {:label (if (:playing @state) "Stop" "Play")
                         :on-click #(swap! state update :playing not)}]]]
 
    (let [max-beats
-         (map (comp
-               (partial apply max)
-               (partial map :beat)
-               :pattern)
-              (vals (:instruments @state)))
+         (for [[_ {pat :pattern}] (:instruments @state)]
+           (apply max (map :beat pat)))
 
-         loop-length
-         (reduce pat/lcm (filter #(< 0 %) max-beats))
+         max-beats (filter #(< 0 %) max-beats)
+
+         loop-length (if (empty? max-beats)
+                       4
+                       (reduce pat/lcm max-beats))
 
          live-notes (into #{}
-                          (map (fn [m] (update m :beat #(+ 1 (mod (- % 1) loop-length))))
+                          (map (fn [m] (update m :beat #(+ 1 (mod % loop-length))))
                                @live-notes))
          ]
 
@@ -173,7 +205,33 @@
        [instrument-block {:key instrument :extend-to loop-length
                           :live-notes live-notes
                           }
-        (reagent/cursor state [:instruments instrument])]))
+        (reagent/cursor state [:instruments instrument])])
+     )
+
+   ;; buttons to cue particular breaks for everyone playing the break
+   ;; something to make the cueing work
+   (for [key (keys pat/patterns)]
+     [ui/flat-button
+      {:key key
+       :on-click
+       #(swap! state
+               (fn [state]
+                 (reduce
+                  (fn [state i]
+                    (let [pk (or (get-in pat/patterns [key i])
+                                 (get-in pat/patterns [key :ALL])
+                                 '[_])]
+                      (assoc-in state [:instruments i :pattern] (pat/complete-pattern pk))
+                      ))
+                  state
+                  pat/instruments))
+               )
+       }
+      key
+      ])
+
+   [structure @state]
+
    ]
   )
 

@@ -8,7 +8,7 @@
 (defn create-sequencer []
   (atom {:fx {}
          :patterns {}
-         :tempo 70
+         :tempo 65
          :playing false
          :animations ()}))
 
@@ -49,8 +49,7 @@
                             :beat beat :time time :note note
                             :instrument instrument})
 
-                    (comment
-                      (effect (+ sound-time beat-time) gain)))
+                    (effect (+ sound-time beat-time) gain))
 
                   )))))
         ;; play next beat later with a bit of slack

@@ -12,7 +12,7 @@
 .drum-line .beat {
     border-left: 1px black solid;
     display: inline-flex;
-    width: 100px;
+    width: 120px;
 }
 
 .drum-line .beat.extended {

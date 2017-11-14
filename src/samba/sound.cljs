@@ -36,14 +36,14 @@
         a 440
         freq (fn [n] (* a (Math/pow root n)))
         note-name
-        ["C" "C#" "D" "D#" "E" "F" "F#" "G" "G#" "A" "A#" "B"]
+        [ "A" "A#" "B" "C" "C#" "D" "D#" "E" "F" "F#" "G" "G#"]
         ]
     (into
      {}
      (for [step (range 9)
            note (range 12)]
        [(keyword (str (note-name note) step))
-        (freq (+ (- note 9) (* 12 (- step 4))))]))))
+        (freq (+ note (* 12 (- step 4))))]))))
 
 (defn copy [f n]
   (fn [c t g]
@@ -154,5 +154,9 @@
         (println "Missing sample for" url now gain)
         ))
     ))
+
+(defn vol [f0 g0]
+  (fn [n g]
+    (f0 n (* g g0))))
 
 (defn current-time [] (.-currentTime *context*))

@@ -40,20 +40,20 @@
 
      :B1 {:M
           ;; diddly da da da
-          [8 . . . . - . - .
+          [8 . . . . _ . _ . | _
            ] ;; diddly da da da
 
           ;; I have left off the final DUM on the break
           ;; because it goes in the pattern
-          :ALL [- - - - | . . . . | - - - - | . . . . ]
+          :ALL [_ _ _ _ | . . . . | _ _ _ _ | . . . . ]
 
           } ;; break one here
 
      :B2 {:ALL
-          [. . - . | - . - . | - . - . | - . - .] ;; extra dum on the end
+          [. . _ . | _ . _ . | _ . _ . | _ . _ .] ;; extra dum on the end
           }
 
-     :BH {[:S1 :S2 :S3 :S4]
+     :BH {:ALL
           [! _ _ _ | _ _ _ _ | _ _ _ _ | _ _ _ _
            ! _ _ _ | _ _ _ _ | _ _ _ _ | _ _ _ _
            ! _ ! _ | ! _ _ ! | _ ! _ ! | ! _ _ _
@@ -62,7 +62,7 @@
           }
 
      :Quiet {:ALL
-             [ - ]
+             [ _ ]
              }
      }
 
