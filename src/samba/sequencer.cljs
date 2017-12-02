@@ -1,5 +1,5 @@
 (ns samba.sequencer
-  (:require [samba.sound :as sound])
+  (:require [samba.patch :as patch])
   )
 
 ;; who should own which bits?
@@ -8,7 +8,7 @@
 (defn create-sequencer []
   (atom {:fx {}
          :patterns {}
-         :tempo 65
+         :tempo 70
          :playing false
          :animations ()}))
 
@@ -19,7 +19,6 @@
          patterns :patterns
          } @sequencer]
 
-    (when-not playing (println "Stopping playback"))
     (when playing
       ;; get the current time from the audio context
       ;; get the next beats for each non-muted instrument
@@ -40,7 +39,7 @@
                 (doseq [{type :type time :time note :note} notes]
                   (let [fraction (/ (- note 1) time)
                         sound-time (* fraction seconds-per-beat)
-                        gain (case type :accent 1 :sound 0.6)]
+                        ]
                     ;; schedule to play this note
                     (swap! animations
                            ;; todo can we put these into a queue or something
@@ -49,7 +48,9 @@
                             :beat beat :time time :note note
                             :instrument instrument})
 
-                    (effect (+ sound-time beat-time) gain))
+                    (effect (+ sound-time beat-time)
+                            (= type :accent))
+                    )
 
                   )))))
         ;; play next beat later with a bit of slack
@@ -59,46 +60,48 @@
                          (+ 1 beat)
                          next-beat-time
                          animations)
-          (- (* 1000 (- next-beat-time (sound/current-time))) 400)
+          (- (* 1000 (- next-beat-time (patch/now))) 600)
           ))))))
 
 (defn- play [sequencer upd set-highlights]
   (let [was-playing (:playing @sequencer)]
     (swap! sequencer update :playing upd)
     (when (and (:playing @sequencer) (not was-playing))
-      (let [now (sound/current-time)
+      (let [now (patch/now)
             animations (atom ())
             frame-start (js/performance.now)
             ]
-        (run-sequence sequencer 1 now animations)
+        (run-sequence sequencer 0 now animations)
         ;; also trigger animatoins
-        (js/requestAnimationFrame
-         (fn paint [frame-time]
-           (let [{playing :playing tempo :tempo} @sequencer
-                 one-beat-time (/ 60 tempo)
-                 ]
-             (when playing
-               (swap! animations
-                      (fn [events]
-                        (let [wall-time (/ (- frame-time frame-start) 1000)
+        ;; this is really expensive it turns out
+        ;; (js/requestAnimationFrame
+        ;;  (fn paint [frame-time]
+        ;;    (let [{playing :playing tempo :tempo} @sequencer
+        ;;          one-beat-time (/ 60 tempo)
+        ;;          ]
+        ;;      (when playing
+        ;;        (swap! animations
+        ;;               (fn [events]
+        ;;                 (let [wall-time (/ (- frame-time frame-start) 1000)
 
-                              recent? (fn [{note-time :time
-                                            t :animation-time :as evt}]
-                                        (let [dtt (/ one-beat-time note-time)
-                                              dt (- (- t now) wall-time)]
-                                          (< (- dtt) dt)))
+        ;;                       recent? (fn [{note-time :time
+        ;;                                     t :animation-time :as evt}]
+        ;;                                 (let [dtt (/ one-beat-time note-time)
+        ;;                                       dt (- (- t now) wall-time)]
+        ;;                                   (< (- dtt) dt)))
 
-                              past? (fn [{t :animation-time :as evt}]
-                                        (let [dt (- (- t now) wall-time)]
-                                          (< dt 0)))
+        ;;                       past? (fn [{t :animation-time :as evt}]
+        ;;                                 (let [dt (- (- t now) wall-time)]
+        ;;                                   (< dt 0)))
 
-                              keep (filter recent? events)
-                              ]
-                          (set-highlights (filter past? keep))
-                          (into () keep))
-                        ))
-               (js/requestAnimationFrame paint))
-             )))
+        ;;                       keep (filter recent? events)
+        ;;                       ]
+        ;;                   (set-highlights (filter past? keep))
+        ;;                   (into () keep))
+        ;;                 ))
+        ;;        (js/requestAnimationFrame paint))
+        ;;      )))
+
         ))))
 
 

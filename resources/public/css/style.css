@@ -4,6 +4,12 @@
     margin:0;
 }
 
+body {
+    max-width:45em;
+    margin-left:auto;
+    margin-right:auto;
+}
+
 .drum-line {
     display: inline-flex;
     flex-wrap: wrap

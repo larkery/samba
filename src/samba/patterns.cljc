@@ -130,6 +130,7 @@
   (if (seq pat)
     (let [pat-beats (group-by :beat pat)
           max-beat (apply max (keys pat-beats))
+          len (max len max-beat)
           output
           (apply concat
                  (for [i (range 0 len)]
