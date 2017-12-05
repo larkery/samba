@@ -11,24 +11,32 @@
 (defn trigger []
   (let [values (atom ())]
     (reify cljs.core/IFn
-      (-invoke [this default-value other-values] ;; doesn't work !
+
+      ;; construct a new Trigger which we can pass to patch functions
+      ;; to listen to
+      (-invoke [this value-or-fn]
         (let [listens (atom ())
+
+              val-fn (if (or (vector? value-or-fn)
+                             (not (fn? value-or-fn)))
+                       (constantly value-or-fn)
+                       value-or-fn)
+
               out (reify
                     Trigger
                     (await [this cb] (swap! listens conj cb))
 
                     Triggers
                     (fire [this]
-                      (doseq [li @listens] (li default-value)))
-                    (fire [this accent]
-                      (let [v2 (or (other-values accent) default-value)]
-                        (doseq [li @listens] (li v2))))
-                    )]
+                      (fire this nil)
+                      )
+                    (fire [this key]
+                      (let [val (val-fn key)]
+                        (doseq [li @listens] (li val)))))
+
+              ]
           (swap! values conj out)
           out))
-
-      (-invoke [this default-value]
-        (this default-value {}))
 
       Triggers
       (fire [t] (doseq [val @values] (fire val)))

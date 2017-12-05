@@ -1,11 +1,7 @@
 (ns samba.instruments
-  (:require [samba.patch :as patch :include-macros true]
-            )
-  )
+  (:require [samba.patch :as patch :include-macros true]))
 
 (enable-console-print!)
-
-(defn r [l h] (+ l (* (Math/random) (- h l))))
 
 (defn fmod
   [{start :start
@@ -86,15 +82,14 @@
               (patch/noise {:type :white :start 0})))
       ]
   (patch/connect! (patch/gain (list 0
-                                    (trigger [[0 0.1] [0.8 0]]
-                                             {:accent [[0 0.3] [0.8 0]]}
-                                             )
-
+                                    (trigger #(case %
+                                                :accent
+                                                [[0 0.3] [0.8 0]]
+                                                [[0 0.1] [0.8 0]]))
                                     ) fm-1 fm-2 noise))
 
   (defn repi [start accent]
-    (patch/at start (if accent (patch/fire trigger :accent) (patch/fire trigger)))
-    )
+    (patch/at start (patch/fire trigger (when accent :accent))))
   )
 
 (let [trigger (patch/trigger)
@@ -132,14 +127,14 @@
               (patch/noise {:type :white :start 0})))
       ]
   (patch/connect! (patch/gain (list 0
-                                    (trigger [[0 0.1] [0.8 0]]
-                                             {:accent [[0 0.3] [0.8 0]]}
-                                             )
-
+                                    (trigger #(case %
+                                                :accent
+                                                [[0 0.3] [0.8 0]]
+                                                [[0 0.1] [0.8 0]]))
                                     ) fm-1 fm-2 noise))
 
   (defn leader [start accent]
-    (patch/at start (if accent (patch/fire trigger :accent) (patch/fire trigger)))
+    (patch/at start (patch/fire trigger (when accent :accent)))
     )
   )
 
@@ -166,18 +161,17 @@
          (patch/noise {:type :red :start 0}))
         ]
 
-    (patch/connect! (patch/gain (list 0 (trigger [[-0.01 0 :ramp] [0 0.8] [1 0]]
-                                                 {:accent [[-0.01 0 :ramp] [0 1] [1 0]]}
-                                                 ))
-                                fm-1 noise
-                                ))
+    (patch/connect!
+     (patch/gain
+      (list 0 (trigger #(case %
+                          :accent
+                          [[-0.01 0 :ramp] [0 1] [1 0]]
+                          [[-0.01 0 :ramp] [0 0.8] [1 0]])
+                       ))
+      fm-1 noise))
 
     (fn [start is-accent]
-      (patch/at start
-                (if is-accent
-                  (patch/fire trigger :accent)
-                  (patch/fire trigger)
-                  )))))
+      (patch/at start (patch/fire trigger (when is-accent :accent))))))
 
 (def surdo-1 (surdo 50))
 (def surdo-2 (surdo 60))
@@ -187,8 +181,10 @@
 (let [trigger (patch/trigger)
       snare-node
       (patch/gain
-       (list 0 (trigger [[-0.01 0 :ramp] [0 0.3] [0.5 0]]
-                        {:accent [[-0.01 0 :ramp] [0 0.5] [0.6 1]]}))
+       (list 0 (trigger #(case %
+                           :accent
+                           [[-0.01 0 :ramp] [0 0.5] [0.6 1]]
+                           [[-0.01 0 :ramp] [0 0.3] [0.5 0]])))
        ;; another filtered triangle
 
        (patch/lowpass
@@ -208,7 +204,5 @@
   ;; so put! and so on doesn't work
   ;; because bindings don't work.
   (defn snare [time accent]
-    (patch/at time (if accent
-                     (patch/fire trigger :accent)
-                     (patch/fire trigger))))
+    (patch/at time (patch/fire trigger (when accent :accent))))
   )
