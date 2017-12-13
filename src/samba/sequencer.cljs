@@ -116,3 +116,6 @@
 
 (defn set-fx! [sequencer fx]
   (swap! sequencer assoc :fx fx))
+
+(defn set-tempo! [sequencer tempo]
+  (swap! sequencer assoc :tempo tempo))

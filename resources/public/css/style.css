@@ -2,12 +2,15 @@
     box-sizing:border-box;
     padding:0;
     margin:0;
+    font-family: Sans-serif;
 }
 
 body {
-    max-width:45em;
+    max-width:46em;
     margin-left:auto;
     margin-right:auto;
+    font-size: 14pt;
+
 }
 
 .drum-line {
@@ -18,7 +21,11 @@ body {
 .drum-line .beat {
     border-left: 1px black solid;
     display: inline-flex;
-    width: 120px;
+    width: 8em;
+}
+
+.break-unit {
+    margin-top: 0.4em;
 }
 
 .drum-line .beat.extended {
@@ -37,9 +44,95 @@ body {
     width: 7em;
     flex-grow : 0;
     flex-shrink: 0;
+    display:flex;
+}
+
+.pattern-header b {
+
+}
+
+.pattern-container:first-child {
+    border-top: 1px #eee solid;
 }
 
 .pattern-container {
-    padding-left: 1.5em;
     display: flex;
+    border-bottom: 1px #eee solid;
+}
+
+.switches {
+    flex-grow:0;
+    margin-left:auto;
+    margin-right:2px;
+}
+
+.switches .switch:first-child {
+    border-left:1px black solid;
+}
+
+.switches .switch:last-child {
+    border-right:1px black solid;
+}
+
+.switches .switch {
+    border-top:1px black solid;
+    border-bottom:1px black solid;
+}
+
+.switches .switch.selected {
+    background:grey;
+    color:white;
+}
+
+div.box {
+    margin-bottom: 2em;
+    padding:0.5em;
+    box-shadow: 0px 5px 5px #ddd;
+}
+
+div.box h1 {
+    border-bottom:1px #eee solid;
+}
+
+div.box p {
+    margin-top:0.5em;
+    text-justify: inter-word;
+    text-align: justify;
+}
+
+dd {
+    font-weight:bold;
+}
+dt {
+    margin-left: 1em;
+}
+
+
+div.controls, div.break .title {
+    background: gold;
+    color: black;
+
+    display:flex;
+    padding:0.2em;
+
+    border-bottom:1px #aaa solid;
+    border-top: 1px #aaa solid;
+}
+
+div.controls .play {
+    margin-left: auto;
+}
+
+div.controls .bpm {
+    margin-left:auto;
+    flex-align: right;
+}
+
+div.break {
+    margin-top:1em;
+}
+
+div.break .title button {
+    margin-left: auto;
+
 }
