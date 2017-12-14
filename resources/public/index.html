@@ -4,166 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="css/style.css" rel="stylesheet" type="text/css">
-    <link rel="icon" href="https://clojurescript.org/images/cljs-logo-icon-32.png">
+    <title>Samba notes</title>
   </head>
   <body>
-    <div class="box">
-      <h1>Bristol Samba Notes</h1>
-      <p>
-        This page contains Tom's notes about Samba drumming.
-        It can also play the patterns as a reminder. The drums
-        are synthesised rather than recorded, so they sound a
-        bit off. The low-frequency component of the surdos
-        gets lost without good speakers or headphones.
-      </p>
-    </div>
+    <div class="top">
+      <div class="box">
+        <h1>Bristol Samba Notes</h1>
+        <p>
+          These are my notes about samba drumming.
+          You can play the patterns as a reminder, but (a) this is
+          too hard for most phones and (b) sounds awful without good
+          speakers. It will only work well in recent Chrome or Firefox.
+        </p>
+        <p>
+          Reader beware, I have almost certainly transcribed some of this wrong.
+          Please tell me if you see a mistake or if you remember something I forgot.
+          You can email me at <a href="mailto:tom@larkery.com">tom@larkery.com</a>.
+          You can see how this works (if curious) <a href="https://github.com/larkery/samba/">here</a>.
+        </p>
+      </div>
 
-    <div class="box">
-      <h1>Instruments</h1>
-      In Samba we have seen seven instruments so far:
-      <dl>
-        <dd>The caixa / snare</dd>
-        <dt>A high-pitched two skinned drum with rattles that
-          add some noise <span id="caixa-sound"></span>
-          .
-        </dt>
-        <dd>The repinique</dd>
-        <dt>A slightly lower pitched two skinned drum played
-          with nylon beaters which makes a ringing sound
-          <span id="repi-sound"></span>.
-        </dt>
-        <dd>The 1st and 2nd Surdo</dd>
-        <dt>Two large bass drums which are sometimes called <em>fundos</em> because
-          they go at the back. The 1st has the lowest note <span id="s1-sound"></span>, and the second a bit higher <span id="s2-sound"></span>.
-        </dt>
-        <dd>The 3rd and 4th Surdo</dd>
-        <dt>Two smaller bass drums, again in increasing order
-          of pitch. The 3rds <span id="s3-sound"></span> often seem to play rolls, and
-          the 4ths <span id="s4-sound"></span> patterns with off-beats in.
-        </dt>
-        <dd>Agogo bells</dd>
-        <dt>
-          These are handbells played with a stick. One bell is tuned a bit higher than the other.
-          Here I've said that the high bell
-          <span id="agogo-high"></span>
-          is on the accents and the low bell
-          <span id="agogo-low"></span>
-          the normal notes.
-        </dt>
-      </dl>
-    </div>
+      <div class="box">
+        <h1>Instruments</h1>
+        In Samba we have seen seven instruments so far:
+        <dl>
+          <dd>The caixa / snare</dd>
+          <dt>A high-pitched two skinned drum with rattles that
+            add some noise <span id="caixa-sound"></span>
+            .
+          </dt>
+          <dd>The repinique</dd>
+          <dt>A slightly lower pitched two skinned drum played
+            with nylon beaters which makes a ringing sound
+            <span id="repi-sound"></span>.
+          </dt>
+          <dd>The 1st and 2nd Surdo</dd>
+          <dt>Two large bass drums which are sometimes called <em>fundos</em> because
+            they go at the back. The 1st has the lowest note <span id="s1-sound"></span>, and the second a bit higher <span id="s2-sound"></span>.
+          </dt>
+          <dd>The 3rd and 4th Surdo</dd>
+          <dt>Two smaller bass drums, again in increasing order
+            of pitch. The 3rds <span id="s3-sound"></span> often seem to play rolls, and
+            the 4ths <span id="s4-sound"></span> patterns with off-beats in.
+          </dt>
+          <dd>Agogo bells</dd>
+          <dt>
+            These are handbells played with a stick. One bell is tuned a bit higher than the other.
+            Here I've said that the high bell
+            <span id="agogo-high"></span>
+            is on the accents and the low bell
+            <span id="agogo-low"></span>
+            the normal notes.
+          </dt>
+        </dl>
+      </div>
 
-    <div class="box">
-      <h1>Patterns &amp; Breaks</h1>
-      <p>
-        The music we have played so far is made of patterns of rhythm,
-        grouped into families like <em>Samba Reggae</em>.
-        Within a family each drum has its own set of patterns
-        which are given numbers. The leader indicates which pattern to play
-        by making a circle with their thumb and forefinger (👌), and then
-        showing a number of fingers (🖐).
-      </p>
-      <p>
-        Within the pattern, time is divided into <em>beats</em>.
-        Most of the patterns we've learned so far are 1,2,4 or 8 beats long,
-        after which they repeat themselves. When keeping a constant <em>tempo</em>
-        all the beats are the same length in time. A faster tempo means shorter
-        beats (so you can fit more into the same time).
-      </p>
-      <p>
-        Each beat is chopped up into equal intervals where notes lie.
-        Often there are four of these, called <em>sixteenths</em>,
-        but in some patterns we also play <em>triplets</em> where a note is
-        a third of a beat.
-      </p>
-      <p>
-        Some of the notes in a beat have a name - the first sixteenth is the
-        <em>on-beat</em>, and the third is the <em>off-beat</em>.
-        Maybe the others have names too?
-      </p>
-      <p>
-        Here's a picture of a pattern which has a note on each beat, and accents
-        on the first and third beats.
-      </p>
-      <div id="example-pattern">Wait a moment :)</div>
-      <p>
-        The vertical lines divide the beats. Silent notes (rests) are
-        dashes, normal notes are dots, and accented notes are <b>!</b>.
-        To show the pattern repeats at beat 2, beats 3 and 4 are grey. If you
-        click on the 2 it will switch to another pattern.
-      </p>
-      <h2>Breaks</h2>
-      <p>
-        Each family also has a set of <em>breaks</em>. These all seem to work
-        a bit differently. The leader indicates a break by making a capital T-shape
-        with their forearms and then a number with their fingers (except for one break
-        which just seems to be sticks-held-sideways).
-      </p>
-      <p>
-        Some breaks are a call-and-response between the leader (or some of the drums) and
-        other drums.
+      <div class="box">
+        <h1>Patterns &amp; Breaks</h1>
+        <p>
+          The music we have played so far is made of patterns of rhythm,
+          grouped into pieces like <em>Samba Reggae</em>.
+          Within a piece each drum has its own set of patterns
+          which are given numbers. The leader indicates which pattern to play
+          by making a circle with their thumb and forefinger (👌), and then
+          showing a number of fingers (🖐).
+        </p>
+        <p>
+          Within the pattern, time is divided into <em>beats</em>.
+          Most of the patterns we've learned so far are 1,2,4 or 8 beats long,
+          after which they repeat themselves. When keeping a constant <em>tempo</em>
+          all the beats are the same length in time. A faster tempo means shorter
+          beats (so you can fit more into the same time).
+        </p>
+        <p>
+          Each beat is chopped up into equal intervals where notes lie.
+          Often there are four of these, called <em>sixteenths</em>,
+          but in some patterns we also play <em>triplets</em> where a note is
+          a third of a beat.
+        </p>
+        <p>
+          Some of the notes in a beat have a name - the first sixteenth is the
+          <em>on-beat</em>, and the third is the <em>off-beat</em>.
+          Maybe the others have names too?
+        </p>
+        <p>
+          Here's a picture of a pattern which has a note on each beat, and accents
+          on the first and third beats.
+        </p>
+        <div id="example-pattern"><div class="spinner" ></div></div>
+        <p>
+          The vertical lines divide the beats. Silent notes (rests) are
+          dashes, normal notes are dots, and accented notes are <b>!</b>.
+          If you click on the 2 it will switch to another pattern. Pressing CUE should
+          play the pattern shown, and if you switch pattern and CUE again, the new
+          pattern will come in on beat 1.
+        </p>
+        <h2>Breaks</h2>
+        <p>
+          Each piece also has a set of <em>breaks</em>. These all seem to work
+          a bit differently. The leader indicates a break by making a capital T-shape
+          with their forearms and then a number with their fingers (except for one break
+          which just seems to be sticks-held-sideways).
+        </p>
+        <p>
+          Some breaks are a call-and-response between the leader (or some of the drums) and
+          other drums.
 
-        Others are like a normal pattern, which plays in a loop.
-      </p>
-      <p>
-        When going <em>into</em> a break, it seems like we usually play a final beat number one
-        before starting the break.
-      </p>
-      <p>
-        When <em>leaving</em> a break, it seems like the break often includes a beat one
-        which is absorbed by the pattern we are returning to.
-      </p>
-    </div>
+          Others are like a normal pattern, which plays in a loop.
+        </p>
+        <p>
+          When going <em>into</em> a break, it seems like we usually play a final beat number one
+          before starting the break.
+          When <em>leaving</em> a break, it seems like the break often includes a beat one
+          which is absorbed by the pattern we are returning to. I have left these out.
+        </p>
+      </div>
 
-    <div class="box">
-      <h1>Samba Reggae</h1>
+      <div class="box">
+        <h1>Samba Reggae</h1>
 
-      <p>
-        Samba Reggae is the first family we learned. It's
-        to a count of four, and the smallest notes are sixteenths.
-      </p>
-      
-      <div id="reggae-patterns">
-        Loading, hang on...
+        <p>
+          Samba Reggae is the first piece we learned. It's
+          to a count of four, and the smallest notes are sixteenths.
+        </p>
+        
+        <div id="reggae-patterns">
+          <div class="spinner" ></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h1>Samba Funk</h1>
+        <p>
+          Samba Funk is the second piece we learned. It's to a count of four, in sixteenths.
+          It sounds 'swung', with a lot of notes on the off-beat.
+        </p>
+        <p>
+          The leader indicates it by making a cross with their beaters or arms (❌).
+        </p>
+        <div id="funk-patterns">
+          <div class="spinner" ></div>
+        </div>
+      </div>
+      <div class="box">
+        <h1>Six-Eight</h1>
+        <p>
+          This is the third piece we learned. As far as I can tell it's still actually in four,
+          but also all the notes are triplets rather than sixteenths. This means that repeating
+          patterns end up swapping hands unless you have 1 or 3 hands.
+        </p>
+        <div id="six-eight-patterns">
+          Loading, hang on...
+        </div>
+      </div>
+      <div class="box">
+        <h1>Aforché</h1>
+        <p>
+          This is the fourth piece we learned. It uses agogo bells.
+          All the surdo play the same pattern, which I've put in as S3 here.
+          In the surdo patterns, some of the rests are actually taps on the drum with hands
+          but I haven't programmed them in yet.
+        </p>
+        <div id="aforche-patterns">
+          <div class="spinner" ></div>
+        </div>
       </div>
     </div>
+    <div id="sequencer" class="sequencer">
+      <div class="spinner"></div>
+    </div>
 
-    <div class="box">
-      <h1>Samba Funk</h1>
-      <p>
-        Samba Funk is the second family we learned. It's to a count of four, in sixteenths.
-        It sounds 'swung', with a lot of notes on the off-beat.
-      </p>
-      <p>
-        The leader indicates it by making a cross with their beaters or arms (❌).
-      </p>
-      <div id="funk-patterns">
-        Loading, hang on...
-      </div>
-    </div>
-    <div class="box">
-      <h1>Six-Eight</h1>
-      <p>
-        This is the third family we learned. As far as I can tell it's still actually in four,
-        but also all the notes are triplets rather than sixteenths. This means that repeating
-        patterns end up swapping hands unless you have 1 or 3 hands.
-      </p>
-      <div id="six-eight-patterns">
-        Loading, hang on...
-      </div>
-    </div>
-    <div class="box">
-      <h1>Aforché</h1>
-      <p>
-        This is the fourth family we learned. It uses agogo bells.
-        All the surdo play the same pattern, which I've put in as S3 here.
-        In the surdo patterns, some of the rests are actually taps on the drum with hands
-        but I haven't programmed them in yet.
-      </p>
-      <div id="aforche-patterns">
-        <div class="spinner" />
-      </div>
-    </div>
     <script src="js/compiled/samba.js" type="text/javascript"></script>
   </body>
 </html>

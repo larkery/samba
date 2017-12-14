@@ -141,7 +141,7 @@
   (let [trigger (patch/trigger)
         fm-1 (fmod {:start 0
                     :modulator {:shape :sine
-                                :frequency 1000
+                                :frequency f0
                                 ;; is there an issue here caused by the phase?
                                 :envelope (trigger [[0 10]
                                                     [0 [5 0.1] :tgt]
@@ -196,7 +196,7 @@
 
         trigger (patch/trigger)
         bell (patch/gain
-              (list 0 (trigger [[0 1] [0 [0 0.5] :tgt]]))
+              (list 0 (trigger [[0 0.3] [0 [0 0.5] :tgt]]))
               (patch/tri  {:envelope (trigger [[0 0.5]  [0 [0 0.25] :tgt]]) :start 0 :frequency (* f 0.25)})
               (patch/tri  {:envelope (trigger [[0 0.75]  [0 [0 0.2] :tgt]]) :start 0 :frequency (* f 0.5)})
               (patch/tri  {:envelope (trigger [[0 1]  [0 [0 0.2] :tgt]]) :start 0 :frequency f})
