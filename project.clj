@@ -13,7 +13,17 @@
                  ]
 
   :plugins [[lein-figwheel "0.5.14"]
+            [lein-shell "0.5.0"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
+
+  :aliases
+  {"make-web" ["do"
+               "clean"
+               ["cljsbuild" "once"]
+               ["shell" "scp" "-r"
+                "resources/public/index.html" "resources/public/css" "resources/public/js"
+                "larkery.com:~/website/samba"]
+               ]}
 
   :source-paths ["src"]
 
