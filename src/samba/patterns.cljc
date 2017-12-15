@@ -17,13 +17,17 @@
             skip :skip-bar}
            command]
         (cond
-          ('#{. _ !} command)
+          ('#{. _ ! h} command)
           (let [next-note (+ note (/ 1 time))
                 end-note (>= next-note 0.999)
                 ]
             {:pattern (conj pattern
                             {:beat beat :time time :note note
-                             :type (case command _ :rest . :sound ! :accent)})
+                             :type (case command
+                                     . :sound ! :accent
+                                     :rest)
+                             :style (when (= command 'h) :hand)
+                             })
              :note (if end-note 0 next-note)
              :beat (if end-note (+ 1 beat) beat)
              :skip-bar end-note
