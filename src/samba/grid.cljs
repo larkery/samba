@@ -36,7 +36,11 @@
         (let [notes (by-beat beat)]
           (for [{type :type note :note time :time} notes]
             [:span.note {:key note
-                         :style (when (= type :rest) {:color :grey})}
+                         :style {:color (when (= type :rest) :grey)
+                                 :width (str (/ 8 time) "em")
+                                 ;; :flex-grow (/ 1 time)
+                                 }
+                         }
              (case type :accent "!" :sound "•" :rest "-")]))]))])
 
 (defn cue-bar [{title :title

@@ -1,9 +1,11 @@
 (ns samba.patterns)
 
 (let [make-rests
-      (fn  [from beat time]
-        (into [] (for [i (range from (+ 1 time))]
-                   {:beat beat :note i
+      (fn  [from-frac beat time]
+        (into [] (for [i (range 0 (/ (- 1 from-frac)
+                                     (/ 1 time)))
+                       ]
+                   {:beat beat :note (+ from-frac (/ i time))
                     :time time :type :rest}))
         )
 
@@ -14,29 +16,37 @@
             note :note
             skip :skip-bar}
            command]
-        (if ('#{. _ !} command)
-          (let [next-note (+ note 1)]
+        (cond
+          ('#{. _ !} command)
+          (let [next-note (+ note (/ 1 time))
+                end-note (>= next-note 0.999)
+                ]
             {:pattern (conj pattern
-                            {:beat beat :time time :note note :type
-                             (case command _ :rest . :sound ! :accent)})
-             :note (if (> next-note time) 1 next-note)
-             :beat (if (> next-note time) (+ 1 beat) beat)
-             :skip-bar (> next-note time)
+                            {:beat beat :time time :note note
+                             :type (case command _ :rest . :sound ! :accent)})
+             :note (if end-note 0 next-note)
+             :beat (if end-note (+ 1 beat) beat)
+             :skip-bar end-note
              :time time})
-          ;; otherwise
-          (let [next-time (if (number? command) command time)]
-            ;; this is a bit wrong; missing rests is too big often.
-            {:pattern (if skip pattern
-                          (into [] (concat pattern (make-rests note beat time))))
-             :beat (if skip beat (+ 1 beat))
-             :note 1
-             :time next-time}
-            )))]
+
+          (number? command)
+          {:pattern pattern
+           :beat beat
+           :note note
+           :time command}
+
+          (= '| command)
+          {:pattern (if skip pattern (into [] (concat pattern (make-rests note beat time))))
+           :beat (if skip beat (+ 1 beat))
+           :note 0
+           :time time}
+          )
+        )]
 
   (defn complete-pattern [pattern]
     (:pattern
      (reduce reducer
-             {:pattern [] :time 4 :beat 1 :note 1 :skip-bar true}
+             {:pattern [] :time 4 :beat 1 :note 0 :skip-bar true}
              pattern)))
 
   )
@@ -70,7 +80,7 @@
       output
       )
     (extend (for [n (range 4)]
-              {:beat 1 :note (+ 1 n)
+              {:beat 1 :note (/ n 4)
                :type :rest :time 4}
               ) len)
     )

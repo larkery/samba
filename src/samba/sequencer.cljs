@@ -72,7 +72,7 @@
 
       (let [pattern
             (if (= pattern :continue)
-              (return-to instrument)
+              ((or return-to {}) instrument)
               pattern)
             ]
 
@@ -83,7 +83,7 @@
                                      (not (= :rest (:type %)))) ;; TODO here is for filtering accents
                                pattern)]
            (doseq [{type :type time :time note :note} pattern]
-             (let [note-time (+ at-time (* seconds-per-beat (/ (- note 1) time)))]
+             (let [note-time (+ at-time (* seconds-per-beat note))]
                ;; shift onto animation queue for later
 
                ;; trigger playing the sound
