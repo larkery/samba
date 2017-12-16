@@ -3,7 +3,7 @@
 
 (enable-console-print!)
 
-(defn record-instrument [create-play-fn]
+(defn record-instrument [gain create-play-fn]
   (let [buffer-a (atom nil)
         buffer-b (atom nil)]
     (patch/record 1.5 (partial reset! buffer-a) (create-play-fn false))
@@ -11,7 +11,7 @@
 
     (fn [time accent]
       (if-let [buffer @(if accent buffer-b buffer-a)]
-        (patch/connect! (patch/sample {:envelope 0.3
+        (patch/connect! (patch/sample {:envelope gain
                                        :buffer buffer :start time}))))))
 
 (defn fmod
@@ -57,6 +57,7 @@
 
 (defn surdo [f0]
   (record-instrument
+   0.25
    (fn [is-accent]
      (println "recording surdo" f0)
      (let [trigger (patch/trigger)
@@ -112,6 +113,7 @@
 
 (def agogo
   (record-instrument
+   0.3
    (fn [accent]
      (let [f (if accent :C5 :A5)
            f (if (keyword? f) (patch/scale f) f)
@@ -136,6 +138,7 @@
 
 (def snare
   (record-instrument
+   0.4
    (fn [accent]
      (let [trigger (patch/trigger)
            snare-node
@@ -192,7 +195,7 @@
                      (list 0 (t #(case %
                                    :accent
                                    [[0 0.4] [0.1 [0 0.1] :tgt]]
-                                   [[0 0.2] [0 [0 0.1] :tgt]]
+                                   [[0 0.3] [0 [0 0.1] :tgt]]
                                    )))
                      noise
                      oscillators)
@@ -202,7 +205,7 @@
       ]
 
   (def repi2
-    (record-instrument play-rep)))
+    (record-instrument 0.25 play-rep)))
 
 
 
