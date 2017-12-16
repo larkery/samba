@@ -43,12 +43,19 @@
       (fire [t a] (doseq [val @values] (fire val a)))
       )))
 
-(defonce *context*
+(defonce ^:dynamic *context*
   (let [constructor (or js/window.AudioContext
                         js/window.webkitAudioContext)]
     (constructor.)))
 
 (defonce ^:dynamic *time* 0)
+
+(defn offline-context [duration & [channels sample-rate]]
+  (let [channels (or channels 2)
+        sample-rate (or sample-rate (.-sampleRate *context*))
+        duration (* duration channels sample-rate)
+        ]
+    (js/OfflineAudioContext. channels duration sample-rate)))
 
 (defn now [] (.-currentTime *context*))
 
@@ -214,7 +221,6 @@
        )
      )))
 
-
 (defn noise
   "Make a noise-generator. A 2-second repeating noise buffer is used."
   [{type :type :as params}]
@@ -226,6 +232,13 @@
     (set! (.. n -buffer) bf)
     (set! (.. n -loop) true)
     (start-stop n params)))
+
+(defn sample
+  "Play a sample from a buffer"
+  [{buffer :buffer :as params}]
+  (let [node (.createBufferSource *context*)]
+    (set! (.. node -buffer) buffer)
+    (start-stop node params)))
 
 (defn filtr [{type :type
               frequency :frequency
