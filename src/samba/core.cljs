@@ -81,28 +81,27 @@
       sequencer-controls
       (fn []
         ;; show nothing if not playing.
+        (if (:is-playing @sequencer)
+          [:div.sequencer {:style {:display :flex :flex-wrap :wrap :flex-direction :row :padding-bottom :0.2em
+                         :align-items :center}}
+           [:span
+            (doall (for [i (keys instrs)]
+                     [:button.muter
+                      {:key i
+                       :class (str (name (or (@mutes i) :normal))
+                                   " cue"
+                                   )
+                       :on-click
+                       #(swap! mutes update i
+                               {:mute nil, nil :accent, :accent :mute})}
 
-        [:div {:style {:display :flex :flex-wrap :wrap :flex-direction :row :padding-bottom :0.2em
-                       :align-items :center}}
-         [:span
-          (doall (for [i (keys instrs)]
-                   [:button.muter
-                    {:key i
-                     :class (str (name (or (@mutes i) :normal))
-                                 " cue"
-                                 )
-                     :on-click
-                     #(swap! mutes update i
-                             {:mute nil, nil :accent, :accent :mute})}
+                      (instrument-labels i) " "
 
-                    (instrument-labels i) " "
+                      (case (@mutes i)
+                        :accent [:strong "!"]
+                        :mute "🔇"
+                        "🔉")]))]
 
-                    (case (@mutes i)
-                      :accent [:strong "!"]
-                      :mute "🔇"
-                      "🔉")]))]
-
-         (when (:is-playing @sequencer)
            [:div {:style {:display :flex :flex-direction :column :margin-left :auto :align-items :center}}
             [:input {:type :range :style {:width :7em}
                      :min 70 :max 130 :step 5
@@ -112,13 +111,9 @@
                      }]
             [:small @tempo "bpm"]
             ]
-           )
 
-         (when (:is-playing @sequencer)
-           [:button.cue {:on-click #(sq/stop! sequencer)} "Stop"]
-           )
-
-         ])
+           [:button.cue {:on-click #(sq/stop! sequencer)} "Stop"]]
+          [:span]))
 
       ]
 

@@ -19,7 +19,7 @@
   :aliases
   {"make-web" ["do"
                "clean"
-               ["cljsbuild" "once"]
+               ["cljsbuild" "once" "min"]
                ["shell" "scp" "-r"
                 "resources/public/index.html" "resources/public/css" "resources/public/js"
                 "larkery.com:~/website/samba"]
