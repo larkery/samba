@@ -108,32 +108,42 @@ dt {
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  background-color: gold;
-
-  margin: 20px auto;
-  -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
-  animation: sk-rotateplane 1.2s infinite ease-in-out;
+    border-radius: 50%;
+    border-top: 6px solid gold;
+    border-bottom: 6px solid #4CAF50;
+    width: 4em;
+    height: 4em;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    animation: spin 2s linear infinite;
+    -webkit-animation: spin 2s linear infinite;
 }
 
-@-webkit-keyframes sk-rotateplane {
-  0% { -webkit-transform: perspective(120px) }
-  50% { -webkit-transform: perspective(120px) rotateY(180deg) }
-  100% { -webkit-transform: perspective(120px) rotateY(180deg)  rotateX(180deg) }
+@-webkit-keyframes spin {
+    0%   {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
-
-@keyframes sk-rotateplane {
-  0% {
-    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
-    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg)
-  } 50% {
-    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
-    -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg)
-  } 100% {
-    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
-    -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
-  }
+@keyframes spin {
+    0%   {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 
 div.top {
@@ -142,7 +152,7 @@ div.top {
 }
 
 div.sequencer {
-    box-shadow: 0px -5px 5px #ddd;
+    box-shadow: 0px -5px 5px #4CAF50;
     padding: 1em;
 }
 
@@ -156,6 +166,7 @@ button.cue {
     font-size: 0.8em;
     transition-duration: 0.1s;
     margin-left:auto;
+    font-variant: small-caps;
 }
 
 button.cue:hover {
@@ -211,11 +222,9 @@ button.muter.accent:hover {
     background: gold;
 }
 
-
 div.break {
     margin-top:1em;
 }
-
 
 input[type=range] {
   -webkit-appearance: none;

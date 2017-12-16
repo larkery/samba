@@ -54,7 +54,7 @@
    [:div {:style {:font-variant :small-caps
                   :font-weight :bold
                   :font-size :1.5em}} title ":"]
-   [:button.cue {:on-click on-click} "CUE"]])
+   [:button.cue {:on-click on-click} "Play"]])
 
 (defn pattern-selector [params patterns]
   (let [selection (reagent/atom (into {} (for [[k v] patterns] [k (first (first v))])))]
