@@ -9,8 +9,22 @@ body {
     font-size: 14pt;
     display: flex;
     flex-direction:column;
-    height:100vh;
+    max-height:100vh;
 }
+
+div#patterns {
+    flex-shrink:1;
+    overflow:auto;
+}
+
+div.sequencer {
+    box-shadow: 0px -5px 5px #4CAF50;
+    padding: 1em;
+    background:white;
+    width:100%;
+    flex:none;
+}
+
 
 .drum-line {
     display: inline-flex;
@@ -146,15 +160,6 @@ dt {
     }
 }
 
-div.top {
-    overflow-y:auto;
-    flex-shrink:1;
-}
-
-div.sequencer {
-    box-shadow: 0px -5px 5px #4CAF50;
-    padding: 1em;
-}
 
 button.cue {
     border-radius: 2px;

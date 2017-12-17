@@ -12,6 +12,11 @@
 (defmacro record [duration callback & stuff]
   `(let [ooc# (offline-context ~duration)]
      (with-context ooc# ~@stuff)
-     (-> ooc#
-         (.startRendering)
-         (.then ~callback))))
+     (let [promise# (.startRendering ooc#)]
+       (if promise#
+         (.then promise# ~callback)
+         (set! (.-oncomplete ooc#)
+               (fn [ev#]
+                 (~callback (.-renderedBuffer ev#))
+                 ))
+         ))))

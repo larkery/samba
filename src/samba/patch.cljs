@@ -1,12 +1,10 @@
 (ns samba.patch)
 
 (defprotocol Trigger
-  (await [t f] "get t from v")
-  )
+  (await [t f] "get t from v"))
 
 (defprotocol Triggers
-  (fire [t] [t a])
-  )
+  (fire [t] [t a]))
 
 (defn trigger []
   (let [values (atom ())]
@@ -54,8 +52,10 @@
   (let [channels (or channels 2)
         sample-rate (or sample-rate (.-sampleRate *context*))
         duration (* duration channels sample-rate)
+        constructor (or js/window.OfflineAudioContext
+                        js/window.webkitOfflineAudioContext)
         ]
-    (js/OfflineAudioContext. channels duration sample-rate)))
+    (constructor. channels duration sample-rate)))
 
 (defn now [] (.-currentTime *context*))
 
