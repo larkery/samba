@@ -52,20 +52,49 @@
 (let [mutes
       (reagent/atom {})
 
+      ;; get reference clocks for each thing
+      animation-start (js/window.performance.now)
+      sound-start (patch/now)
+
+      ;; since play-instrument is called for instruments' sounds
+      ;; we can use it to record the times requested?
+
+      flash-queue (atom {})
+      flashes (reagent/atom {})
+
       play-instrument
       (fn play-instrument [i t a]
         (if-let [instr (instrs i)]
-          (let [mute (@mutes i)]
-            (case mute
-              :accent (if a (instr t a))
-              :mute nil
-              (instr t a)))
+          (let [mute (@mutes i)
+                play (case mute :accent a :mute false true)
+                ]
+            (when play
+              (instr t a)
+              (swap! flash-queue update i conj (- t sound-start))))
           (if (seq i)
             (doseq [i i] (play-instrument i t a)))))
 
+      _ (js/window.requestAnimationFrame
+         (fn animate [time]
+           (let [time (/ (- time animation-start) 1000)]
+             (swap! flash-queue
+                    (fn [flash-queue]
+                      (->> flash-queue
+                           (map (fn [[k vs]] [k (filter (partial < (- time 0.1)) vs)]))
+                           (into {}))))
+
+             (reset! flashes
+                     (->> @flash-queue
+                          (map (fn [[k vs]] [k (some (partial > time) vs)]))
+                          (into {})))
+
+             (js/window.requestAnimationFrame animate)
+             )))
+
+
       sequencer
       (sq/create-sequencer
-       {:fx play-instrument :tempo 100}
+       {:fx play-instrument :tempo 80}
        reagent/atom)
 
       tempo (reagent/cursor sequencer [:tempo])
@@ -77,32 +106,14 @@
           :labels instrument-labels}
          patterns breaks])
 
-
       sequencer-controls
       (fn []
         ;; show nothing if not playing.
         (if (:is-playing @sequencer)
           [:div.sequencer {:style {:display :flex :flex-wrap :wrap :flex-direction :row :padding-bottom :0.2em
-                         :align-items :center}}
-           [:span
-            (doall (for [i (keys instrs)]
-                     [:button.muter
-                      {:key i
-                       :class (str (name (or (@mutes i) :normal))
-                                   " cue"
-                                   )
-                       :on-click
-                       #(swap! mutes update i
-                               {:mute nil, nil :accent, :accent :mute})}
+                                   :align-items :center}}
 
-                      (instrument-labels i) " "
-
-                      (case (@mutes i)
-                        :accent [:strong "!"]
-                        :mute "🔇"
-                        "🔉")]))]
-
-           [:div {:style {:display :flex :flex-direction :column :margin-left :auto :align-items :center}}
+           [:div {:style {:display :flex :flex-direction :column :margin-right :auto :align-items :center}}
             [:input {:type :range :style {:width :7em}
                      :min 70 :max 130 :step 5
                      :value @tempo
@@ -110,9 +121,28 @@
                                    (reset! tempo value))
                      }]
             [:small @tempo "bpm"]
+
             ]
 
-           [:button.cue {:on-click #(sq/stop! sequencer)} "Stop"]]
+           [:span.mutes
+            (doall (for [i (keys instrs)]
+                     [:button.muter
+                      {:key i
+                       :class (str (name (or (@mutes i) :normal))
+                                   " cue"
+                                   (when (@flashes i) " flash"))
+                       :on-click
+                       #(swap! mutes update i
+                               {:mute nil, nil :accent, :accent :mute})}
+
+                      [:span.light]
+
+                      (instrument-labels i) " "
+                      ]))]
+
+
+           [:button.cue {:on-click #(sq/stop! sequencer)} "Stop"]
+           ]
           [:span]))
 
       ]
