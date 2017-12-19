@@ -36,7 +36,7 @@ div.sequencer {
 .drum-line .beat {
     border-right: 1px black solid;
     display: inline-flex;
-    width: 8em;
+    width: 7em;
 }
 
 .drum-line .beat.extended {

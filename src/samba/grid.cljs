@@ -38,7 +38,7 @@
             [:span.note {:key note
                          :title (str "1/" time " beat")
                          :style {:color (when (= type :rest) :grey)
-                                 :width (str (/ 8 time) "em")
+                                 :width (str (/ 7 time) "em")
                                  ;; :flex-grow (/ 1 time)
                                  }
                          }
