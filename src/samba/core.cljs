@@ -85,7 +85,7 @@
 
              (reset! flashes
                      (->> @flash-queue
-                          (map (fn [[k vs]] [k (some (partial > time) vs)]))
+                          (map (fn [[k vs]] [k (some (partial > (+ time 0.1)) vs)]))
                           (into {})))
 
              (js/window.requestAnimationFrame animate)
@@ -115,7 +115,7 @@
 
            [:div {:style {:display :flex :flex-direction :column :margin-right :auto :align-items :center}}
             [:input {:type :range :style {:width :7em}
-                     :min 70 :max 130 :step 5
+                     :min 50 :max 120 :step 5
                      :value @tempo
                      :on-change #(let [value (.. % -target -value)]
                                    (reset! tempo value))
@@ -177,7 +177,8 @@
               :2  '[_ _ _ _ | _ . . _ ]
               }
         :rep {:1 '[! . . ! | . . ! . | . . ! . | . ! . .]
-              :3 '[! . . ! | . . ! . | . . ! . | ! . . .]
+              ;;              :3 '[! . . ! | . . ! . | . . ! . | ! . . .]  this is son clave which we do not use here
+              :3 '[! . . ! | . . ! . | ! . . ! | . . ! .]
               :5 '[! . . ! | . . . ! | . . ! . | ! . . .]
               }
         :cai {:1 '[. . ! .]}
@@ -253,27 +254,44 @@
         :s2 {:1 '[3 . _ _ | _ _ _]}
                                         ;      :s3 {}
         :s4 {:1 '[3 . . . | _ _ _ | _ _ _ | _ _ _]}
-                                        ;      :rep {} ;; the pattern I can't remember
+        :rep {:1 '[3 . _ . | _ . . | _ . _ | . . _]
+
+                                        ;; :2 '[3 ] dum da dum da
+              }
         :cai {:1 '[3 . . .]}
         }
        ]
 
       :aforche-patterns
       [dl
-       {:s3 {:1 '[h h . _]
-             :2 '[h . . _]
-             }
+       {drums {:1 '[h h . _]
+               :2 '[h . . _]
+               }
         :cai {:1 '[. . ! .]}
-        :rep {:1 '[! _ _ _]}
+        :rep {:1 '[! _ _ _]
+              :2 '[. . _ _ | _ _ _ _ | . _ . _ | _ _ _ _
+                   . . _ _ | _ _ _ _ | 6 . . . 4 . _ | 6 . . . 4 . _
+                   . . _ _ | _ _ _ _ | . _ . _ | _ _ _ _
+                   . . _ _ | _ _ _ _ | 3 . . . | 4 . _ _ _
+
+                   . . _ _ | _ _ _ _ | . _ . _ | _ _ _ _
+                   . . _ _ | _ _ _ _ | 6 . . . 4 . _ | 6 . . . 4 . _
+                   . . _ _ | _ _ _ _ | . _ . _ | _ _ _ _
+                   . . _ _ | _ _ _ _ | . _ . _ | . _ . _
+                   ]
+              }
         :agg {:1 '[! ! _ . | _ . . _ | ! _ ! _ | . _ . _ ]}
-        } ; TODO accents vs hands
+        }
 
        {"Break 1 (repeat x4)"
         [{:agg '[! ! _ . | _ . . _ | ! _ ! _ | . _ . _ ]}
          {:agg '[! ! _ . | _ . . _ | ! _ ! _ | . _ . _ ]
           drums '[_ | _ | ! _ ! _ | ! _ ! _ ]}
          ]
-        :2
+        :2 [{drums '[. _ _ . | _ _ . _ | . _ _ . | _ _ . _ ]
+             :agg :continue
+             }]
+        :3
         [{drums '[. _ . . | _ . . _ | . _ . . | _ . . _ | . _ . . | _ . . _ | ! _ _ _ | _ |
                   . _ . . | _ . . _ | . _ . . | _ . . _ | . _ . . | _ . . _ | ! _ !  _ | ! _ ! _
                   ]}]
