@@ -49,6 +49,12 @@ div.sequencer {
     /* flex-basis: 1em; */
     text-align: left;
     margin-left:0;
+    transition-duration:0.2s;
+    cursor:default;
+}
+
+.drum-line .beat .note:hover {
+    background: gold;
 }
 
 .pattern-header {

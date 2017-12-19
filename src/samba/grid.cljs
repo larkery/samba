@@ -36,6 +36,7 @@
         (let [notes (by-beat beat)]
           (for [{type :type note :note time :time style :style} notes]
             [:span.note {:key note
+                         :title (str "1/" time " beat")
                          :style {:color (when (= type :rest) :grey)
                                  :width (str (/ 8 time) "em")
                                  ;; :flex-grow (/ 1 time)
