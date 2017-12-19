@@ -162,4 +162,4 @@
       ]
 
   (def repi2
-    (record-instrument 0.25 play-rep)))
+    (record-instrument 0.3 play-rep)))

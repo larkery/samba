@@ -80,7 +80,7 @@
              (swap! flash-queue
                     (fn [flash-queue]
                       (->> flash-queue
-                           (map (fn [[k vs]] [k (filter (partial < (- time 0.2)) vs)]))
+                           (map (fn [[k vs]] [k (filter (partial < (- time 0.1)) vs)]))
                            (into {}))))
 
              (reset! flashes
