@@ -14,106 +14,63 @@
         (patch/connect! (patch/sample {:envelope gain
                                        :buffer buffer :start time}))))))
 
-(defn fmod
-  [{start :start
-    duration :duration
-    mod-params :modulator
-    carrier-params :carrier
-    filter-params :filter
-    envelope :envelope}]
-  (patch/at start
-            (let [mod-params
-                  (merge
-                   {:shape :triangle :frequency 200
-                    :envelope [[0 1] [duration 0 :exp]]
-                    :start 0 :duration duration
-                    }
-                   mod-params)
-
-                  carrier-params
-                  (merge {:shape :triangle :start 0 :duration duration}
-                         carrier-params)
-
-                  filter-params
-                  (merge {:type :lowpass :frequency 1000} filter-params)
-
-                  envelope
-                  (or envelope [[0 1] [duration 0 :expt]])
-
-                  modulator
-                  (patch/wave mod-params)
+(defn sos-bass [{f0 :frequency
+                 beta :beta
+                 sharpen :sharpen
+                 gain :gain
+                 decay :decay
+                 }]
+  (patch/at (patch/now)
+            (let [modulator
+                  (patch/sine {:frequency f0 :envelope (* f0 beta)
+                               :start 0 :stop 1})
 
                   carrier
-                  (patch/wave (merge
-                               carrier-params
-                               {:frequency (list
-                                            (or (:frequency carrier-params) 440)
-                                            modulator)}))
+                  (patch/tri {:start 0 :stop 1
+                              :frequency (list f0 modulator)})
 
-                  filter
-                  (patch/filtr filter-params carrier)
+                  hpf
+                  (patch/highpass {:frequency 8000} carrier)
+
+                  lpf
+                  (patch/lowpass {:frequency [[0 10000] [0.1 200 :exp]]} hpf)
+
+                  carrier-2
+                  (patch/tri {:start 0 :stop 1
+                              :frequency [[0 (* (+ 1 sharpen) f0)] [0.1 f0 :exp]]})
+
+                  lpf-2
+                  (patch/lowpass {:frequency 400} carrier-2)
+
+                  output
+                  (patch/gain [[0 gain] [0 [0 decay] :tgt]] lpf lpf-2)
                   ]
-              (patch/gain envelope filter))))
 
-(defn surdo [f0]
+              (patch/connect! output))))
+
+(def surdo-1
   (record-instrument
-   0.25
-   (fn [is-accent]
-     (println "recording surdo" f0)
-     (let [trigger (patch/trigger)
-        fm-1 (fmod {:start 0
-                    :modulator {:shape :sine
-                                :frequency f0
-                                ;; is there an issue here caused by the phase?
-                                :envelope (trigger [[0 10]
-                                                    [0 [5 0.1] :tgt]
-                                                    ;; [0.5 5 :exp]
-                                                    ])
-                                }
-                    :carrier {:shape :sine :frequency f0}
-                    :envelope (trigger [;; [-0.01 0 :ramp]
-                                        [0 1]
-                                        [0 [0 0.2] :tgt]
-                                        ;[1 0 :exp]
+   0.6
+   (fn [a] (sos-bass {:gain 1 :decay 0.15 :frequency 60 :beta 4 :sharpen (if a 0.25 0)}))))
 
-                                        ])
-                    :filter {:Q 2 :frequency 300 :type :lowpass}
-                    })
+(def surdo-2
+  (record-instrument
+   0.6
+   (fn [a] (sos-bass {:gain 1 :decay 0.12 :frequency 75 :beta 4 :sharpen (if a 0.25 0)}))))
 
-        noise
-        (patch/filtr
-         {:type :lowpass
-          :frequency (trigger [[0 5000]
-                               [0 [4000 0.05] :tgt]
-                               ;; [0.25 4000 :exp]
-                               ])
-          :envelope (trigger [;; [-0.01 0 :ramp]
-                              [0 0.75]
-                              [0.01 [0 0.05] :tgt]
-                              ;[0.5 0.0 :exp]
-                              ])
-          }
-         (patch/noise {:type :red :start 0}))
-        ]
+(def surdo-3
+  (record-instrument
+   0.5
+   (fn [a] (sos-bass {:gain (if a 1 0.75) :decay 0.1 :frequency 90 :beta 4 :sharpen (if a 0.25 0)}))))
 
-    (patch/connect!
-     (patch/gain
-      (list 0 (trigger #(case %
-                          :accent
-                          [[-0.01 0 :ramp] [0 1.5] [2 0]]
-                          [[-0.01 0 :ramp] [0 1.2] [2 0]])
-                       ))
-      fm-1 noise))
-    (patch/at 0.01 (patch/fire trigger (when is-accent :accent)))))))
-
-(def surdo-1 (surdo 60))
-(def surdo-2 (surdo 70))
-(def surdo-3 (surdo 80))
-(def surdo-4 (surdo 90))
+(def surdo-4
+  (record-instrument
+   0.5
+   (fn [a] (sos-bass {:gain (if a 1 0.75) :decay 0.09 :frequency 110 :beta 4 :sharpen (if a 0.25 0)}))))
 
 (def agogo
   (record-instrument
-   0.3
+   0.2
    (fn [accent]
      (let [f (if accent :C5 :A5)
            f (if (keyword? f) (patch/scale f) f)
@@ -138,7 +95,7 @@
 
 (def snare
   (record-instrument
-   0.4
+   0.3
    (fn [accent]
      (let [trigger (patch/trigger)
            snare-node
@@ -206,14 +163,3 @@
 
   (def repi2
     (record-instrument 0.25 play-rep)))
-
-
-
-;; (defn fm [{frequency :frequency ;; fundamental
-;;            beta :beta ;; the modulation index
-;;            cmr :cmr ;; carrier-to-modulator ratio}
-;;            }]
-;;   (let [modulator (patch/wave something)
-;;         carrier (patch/wave something)
-;;         ])
-;;   )

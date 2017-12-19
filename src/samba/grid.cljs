@@ -34,16 +34,18 @@
                     :class (when (and extended-from (> beat extended-from)) "extended")
                     }
         (let [notes (by-beat beat)]
-          (for [{type :type note :note time :time style :style} notes]
+          (for [{type :type note :note time :time} notes]
             [:span.note {:key note
-                         :title (str "1/" time " beat "  (name (or style type)))
+                         :title (str "1/" time " beat " (name type))
                          :style {:color (when (= type :rest) :grey)
                                  :width (str (/ 7 time) "em")
-                                 ;; :flex-grow (/ 1 time)
                                  }
                          }
-             (case type :accent "!" :sound "•" :rest
-                   (case style :hand "🖐" "-"))]))]))])
+             (case type
+               :accent "!"
+               :sound "•"
+               :rest "-"
+               :hand "🖐")]))]))])
 
 (defn cue-bar [{title :title
                 on-click :on-click

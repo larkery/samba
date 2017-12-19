@@ -24,9 +24,10 @@
             {:pattern (conj pattern
                             {:beat beat :time time :note note
                              :type (case command
-                                     . :sound ! :accent
+                                     . :sound
+                                     ! :accent
+                                     h :hand
                                      :rest)
-                             :style (when (= command 'h) :hand)
                              })
              :note (if end-note 0 next-note)
              :beat (if end-note (+ 1 beat) beat)

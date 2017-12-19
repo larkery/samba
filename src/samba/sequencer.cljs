@@ -80,7 +80,7 @@
          (let [beat (+ 1 (mod (- beat 1)
                               (apply max (map :beat pattern))))
                pattern (filter #(and (= beat (:beat %))
-                                     (not (= :rest (:type %)))) ;; TODO here is for filtering accents
+                                     (not (#{:rest :hand} (:type %))))
                                pattern)]
            (doseq [{type :type time :time note :note} pattern]
              (let [note-time (+ at-time (* seconds-per-beat note))]
