@@ -42,8 +42,12 @@
                   lpf-2
                   (patch/lowpass {:frequency 400} carrier-2)
 
+                  noise
+                  (patch/noise {:type :red :start 0
+                                :envelope [[0 1] [0 [0 0.05] :tgt]]})
+
                   output
-                  (patch/gain [[0 gain] [0 [0 decay] :tgt]] lpf lpf-2)
+                  (patch/gain [[0 gain] [0 [0 decay] :tgt]] lpf lpf-2 noise)
                   ]
 
               (patch/connect! output))))
@@ -51,26 +55,30 @@
 (def surdo-1
   (record-instrument
    0.6
-   (fn [a] (sos-bass {:gain 1 :decay 0.2 :frequency 70 :beta 4 :sharpen (if a 0.25 0)}))))
+   (fn [a] (sos-bass {:gain 1 :decay 0.2 :frequency 50 :beta 4
+                      :sharpen (if a 0.25 0)}))))
 
 (def surdo-2
   (record-instrument
    0.6
-   (fn [a] (sos-bass {:gain 1 :decay 0.2 :frequency 80 :beta 4 :sharpen (if a 0.25 0)}))))
+   (fn [a] (sos-bass {:gain 1 :decay 0.2 :frequency 65 :beta 4
+                      :sharpen (if a 0.25 0)}))))
 
 (def surdo-3
   (record-instrument
-   0.5
-   (fn [a] (sos-bass {:gain (if a 1.1 0.8) :decay 0.1 :frequency 90 :beta 4 :sharpen (if a 0.25 0)}))))
+   0.7
+   (fn [a] (sos-bass {:gain (if a 1.1 0.8) :decay 0.1 :frequency 75
+                      :beta 4 :sharpen (if a 0.25 0)}))))
 
 (def surdo-4
   (record-instrument
-   0.5
-   (fn [a] (sos-bass {:gain (if a 1.1 0.8) :decay 0.1 :frequency 100 :beta 4 :sharpen (if a 0.25 0)}))))
+   0.7
+   (fn [a] (sos-bass {:gain (if a 1.1 0.8) :decay 0.1 :frequency 80
+                      :beta 4 :sharpen (if a 0.25 0)}))))
 
 (def agogo
   (record-instrument
-   0.2
+   0.3
    (fn [accent]
      (let [f (if accent :C5 :A5)
            f (if (keyword? f) (patch/scale f) f)
