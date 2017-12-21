@@ -37,7 +37,7 @@
           (for [{type :type note :note time :time} notes]
             [:span.note {:key note
                          :title (str "1/" time " beat " (name type))
-                         :style {:color (when (= type :rest) :grey)
+                         :style {:color (when (= type :rest) "#bbb")
                                  :width (str (/ 7 time) "em")
                                  }
                          }

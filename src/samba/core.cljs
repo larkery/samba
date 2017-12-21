@@ -52,31 +52,29 @@
 (let [mutes
       (reagent/atom {})
 
-      ;; get reference clocks for each thing
-      animation-start (js/window.performance.now)
-      sound-start (patch/now)
-
-      ;; since play-instrument is called for instruments' sounds
-      ;; we can use it to record the times requested?
-
+      ;; records the time when things are going to flash
       flash-queue (atom {})
+      ;; updated in request animation frame to change what is flashing
       flashes (reagent/atom {})
 
       play-instrument
       (fn play-instrument [i t a]
         (if-let [instr (instrs i)]
-          (let [mute (@mutes i)
+          (let [p-now (/ (js/performance.now) 1000)
+                a-now (patch/now)
+
+                mute (@mutes i)
                 play (case mute :accent a :mute false true)
                 ]
             (when play
               (instr t a)
-              (swap! flash-queue update i conj (- t sound-start))))
+              (swap! flash-queue update i conj (- (+ p-now t) a-now))))
           (if (seq i)
             (doseq [i i] (play-instrument i t a)))))
 
       _ (js/window.requestAnimationFrame
          (fn animate [time]
-           (let [time (/ (- time animation-start) 1000)]
+           (let [time (/ time 1000)]
              (swap! flash-queue
                     (fn [flash-queue]
                       (->> flash-queue
@@ -236,14 +234,14 @@
         :s2 {:1 '[. _ _ _ | _ _ _ _ | . _ . _ | _ _ _ _]}
         :s3 {:1 '[_ _ _ _ | _ _ _ _ | _ _ _ . | ! _ . _]}
         :s4 {:1 '[. . . . | . _ _ _ | _ _ _ _ | _ _ _ _]}
-        :rep {:1? '[_ _ _ _ | . _ . _ | . _ _ _ | . _ _ _]} ;; TODO maybe wrong
+        :rep {:1? '[_ _ _ _ | !  _ . . | _ _ _ _ | ! _ _ _]} ;; TODO maybe wrong
         :cai {:1 '[. . ! .]}}
 
        {:1
         [
-         {:rep '[8 . . . | . . . | . . . 4 _ . _ | . _  ] }
-         {:rep   '[8 . . . | . . . | . . . 4 _ . _ | . _ ! ! ]
-          surdos '[   _    |   _   | 8 _ _ !  4 _ ! _ | ! _ _ _ ]}
+         {:rep    '[6 . . . _ _ . | . . _ _ . . | 4 ! _ ! _ ! _ ! !]
+          surdos  '[_ | _ |   ! _ ! _ ! _ _ _]
+          }
          ;;  }
 
          ]
