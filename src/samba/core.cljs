@@ -299,11 +299,31 @@
 
        ]
 
-      :bioneau
+      ;; missing instruments:
+      ;; triangle, shaker
+      ;; shaker is basically shaped noise with a bandpass
+      ;; triangle sounds ring modulated?
+      :baiao
       [dl
-       {:rep {:1 '[. . . . | ! . ! . | . ! . . | ! . ! . ]
+       {#{:s1 :s2 :s3}
+        {:1 '[. _ . _ | . . _ . ]}
+
+        :s4 {:1 '[h h . _]}
+
+        :rep {:1 '[. . . . | ! . ! . | . ! . . | ! . ! . ]
               :2 '[. . . . | ! . ! . | . ! . . | ! . ! ! ]}
-       ]
+
+        :cai {:1 '[! . . ! | . . ! . | . ! ! . | ! . ! .]
+
+              }
+
+        :tri {:1 '[. . ! .]} ;; I think there's an accent on the off-beat?
+
+        :agg {:1 '[! _ _ _ | . _ _ _]}
+
+        }
+        {}
+        ]
       })
 
 
