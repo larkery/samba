@@ -80,7 +80,7 @@
   (record-instrument
    0.3
    (fn [accent]
-     (let [f (if accent :C5 :A5)
+     (let [f (if accent :C6 :A6)
            f (if (keyword? f) (patch/scale f) f)
            trigger (patch/trigger)
            bell (patch/gain
