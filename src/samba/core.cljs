@@ -306,7 +306,7 @@
       :baiao
       [dl
        {#{:s1 :s2 :s3}
-        {:1 '[. _ . _ | . . _ . ]}
+        {:1 '[. _ _ _ | . _ _ _ |  . . _ . | _ _ _ _]}
 
         :s4 {:1 '[h h . _]}
 
@@ -317,7 +317,7 @@
 
               }
 
-        :tri {:1 '[. . ! .]} ;; I think there's an accent on the off-beat?
+        ;;:tri {:1 '[. . ! .]} ;; I think there's an accent on the off-beat?
 
         :agg {:1 '[! _ _ _ | . _ _ _]}
 
