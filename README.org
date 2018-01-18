@@ -5,7 +5,7 @@ I've learned at Bristol Samba. It's done with clojurescript & reagent.
 
 * Pattern Syntax
 
-The patterns are all stored in [[./src/samba/patterns/][this folder]], organized by the piece.
+The patterns are all stored in [[./src/samba/patterns/][this folder here]], organized by the piece.
 
 A single pattern is written as a list of symbols, like this:
 
