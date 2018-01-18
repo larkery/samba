@@ -55,26 +55,26 @@
 (def surdo-1
   (record-instrument
    0.6
-   (fn [a] (sos-bass {:gain 1 :decay 0.2 :frequency 50 :beta 4
+   (fn [a] (sos-bass {:gain 1 :decay 0.2 :frequency 65 :beta 30
                       :sharpen (if a 0.25 0)}))))
 
 (def surdo-2
   (record-instrument
    0.6
-   (fn [a] (sos-bass {:gain 1 :decay 0.2 :frequency 65 :beta 4
+   (fn [a] (sos-bass {:gain 1 :decay 0.2 :frequency 75 :beta 20
                       :sharpen (if a 0.25 0)}))))
 
 (def surdo-3
   (record-instrument
    0.7
-   (fn [a] (sos-bass {:gain (if a 1.1 0.8) :decay 0.1 :frequency 75
-                      :beta 4 :sharpen (if a 0.25 0)}))))
+   (fn [a] (sos-bass {:gain (if a 1.1 0.8) :decay 0.15 :frequency 90
+                      :beta 10 :sharpen (if a 0.25 0)}))))
 
 (def surdo-4
   (record-instrument
    0.7
-   (fn [a] (sos-bass {:gain (if a 1.1 0.8) :decay 0.1 :frequency 80
-                      :beta 4 :sharpen (if a 0.25 0)}))))
+   (fn [a] (sos-bass {:gain (if a 1.1 0.8) :decay 0.15 :frequency 100
+                      :beta 10 :sharpen (if a 0.25 0)}))))
 
 (def agogo
   (record-instrument

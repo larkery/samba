@@ -32,10 +32,10 @@
     :cai :continue                                           ; Caixa likewise
     :rep :continue                                           ; And repinique
     surdos                                                   ; Drums play half of the pulse
-    '[* _ _ _ | * _ _ _ | _ _ _ _ | _ _ _ _ |                ; TODO (should this be * _ _ *)
-      * _ _ _ | * _ _ _ | _ _ _ _ | _ _ _ _ |
-      * _ _ _ | * _ _ _ | _ _ _ _ | _ _ _ _ |
-      * _ _ _ | * _ _ _ | * * _ * | _ * * _                  ; And then have a twiddle at the end
+    '[* _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |                ; TODO (should this be * _ _ *)
+      * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |
+      * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |
+      * _ _ * | _ _ _ _ | * * _ * | _ * * _                  ; And then have a twiddle at the end
                                                              ; TODO not sure about my timing in this
       ]
     }])
@@ -45,10 +45,10 @@
   [{:agg :continue
     :cai :continue
     (conj surdos :rep)                                       ; the repinique joins the surdos
-    '[* _ _ _ | * _ _ _ | _ _ _ _ | _ _ _ _ |                ; TODO I am missing the twiddle for
-      * _ _ _ | * _ _ _ | _ _ _ _ | _ _ _ _ |                ;      the repinique, unfortunately
-      * _ _ _ | * _ _ _ | _ _ _ _ | _ _ _ _ |
-      * _ _ _ | * _ _ _ | * * _ * | _ * * _
+    '[* _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |                ; TODO I am missing the twiddle for
+      * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |                ;      the repinique, unfortunately
+      * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |
+      * _ _ * | _ _ _ _ | * * _ * | _ * * _
       ]
     }])
 
