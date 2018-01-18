@@ -9,14 +9,14 @@
    :s3  {:1 '[. _ _ _ | _ _ _ _ | . . . . | . . . . |           ; surdo 3, pattern 1
               . _ _ _ | _ _ _ _ | _ _ _ _ | . . . .]
          }
-   :s4  {:1  '[. _ _ _ | . _ ! _ | . _ _ _ | . ! _ !]           ; surdo 4, pattern 1
+   :s4  {:1  '[. _ _ _ | . _ # _ | . _ _ _ | . # _ #]           ; surdo 4, pattern 1
          :2  '[_ _ _ _ | _ . . _ ]                              ; surdo 4, pattern 2
          }
-   :rep {:1 '[! . . ! | . . ! . | . . ! . | . ! . .]            ; repinique, pattern 1
-         :3 '[! . . ! | . . ! . | ! . . ! | . . ! .]            ; repinique, pattern 3
-         :5 '[! . . ! | . . . ! | . . ! . | ! . . .]            ; repinique, pattern 5
+   :rep {:1 '[# . . # | . . # . | . . # . | . # . .]            ; repinique, pattern 1
+         :3 '[# . . # | . . # . | # . . # | . . # .]            ; repinique, pattern 3
+         :5 '[# . . # | . . . # | . . # . | # . . .]            ; repinique, pattern 5
          }
-   :cai {:1 '[. . ! .]                                          ; caixa, pattern 1
+   :cai {:1 '[. . # .]                                          ; caixa, pattern 1
          }
    })
 
@@ -35,10 +35,10 @@
 
 (def horizontal-sticks                                          ; HORIZONTAL STICKS
   [{surdos                                                      ; Drum pattern:
-    '[! | _ | _ | _ |                                           ; Dum!
-      ! | _ | _ | _ |                                           ; Dum!
+    '[# | _ | _ | _ |                                           ; Dum#
+      # | _ | _ | _ |                                           ; Dum#
 
-      ! _ _ ! | _ _ ! _ | _ _ ! _ | ! _ ! !                     ; dak-dak-dak dum dum da-dum
+      # _ _ # | _ _ # _ | _ _ # _ | # _ # #                     ; dak-dak-dak dum dum da-dum
 
       | | | | |                                                 ; Wait for a bit
 

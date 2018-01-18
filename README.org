@@ -10,24 +10,16 @@ The patterns are all stored in [[./src/samba/patterns/][this folder]], organized
 A single pattern is written as a list of symbols, like this:
 
 #+BEGIN_SRC cljs
-[ ! . . ! | . . ! . | . . ! . | ! . . . ]
+[ # . . # | . . # . | . . # . | # . . . ]
 #+END_SRC
 
 This is son clave played hand to hand. The symbols used are:
 
 - ~[~ and ~]~ :: The beginning and end of the list
-- ~!~ :: An accented note
 - ~.~ :: A normal note
+- ~#~ :: An accented note
 - ~|~ :: A line to separate each beat.
          You can leave these out but they make it easier to read.
-         If the remainder of a beat should all be rests you can just say ~|~ to end the beat and fill in the rests, so
-         #+BEGIN_SRC cljs
-         [ ! | ! | ]
-         #+END_SRC
-         Is just like a shorter way of writing
-         #+BEGIN_SRC cljs
-         [ ! _ _ _ | ! _ _ _ ]
-         #+END_SRC
 - Blank space :: Blank space is needed to separate the symbols
 
 There are two other note symbols that are used:
@@ -38,10 +30,19 @@ There are two other note symbols that are used:
 So
 
 #+BEGIN_SRC cljs
-[ h h ! _ | h h ! _ ]
+[ h h # _ | h h # _ ]
 #+END_SRC
 
 Is "tap tap Accent rest, tap tap Accent rest".
+
+If the remainder of a beat should all be rests you can just say ~|~ to end the beat and fill in the rests, so
+#+BEGIN_SRC cljs
+[ # | # | ]
+#+END_SRC
+Is just like a shorter way of writing
+#+BEGIN_SRC cljs
+[ # _ _ _ | # _ _ _ ]
+#+END_SRC
 
 Finally numbers indicate a change in note length (not beat length though)
 

@@ -7,34 +7,34 @@
            :2 '[h . . _]                                          ;    Pattern 2
            :5 '[h h . _ | h h . _ | h h . h | . h . h]            ;    Pattern 5
            }
-   :cai {:1 '[. . ! .]                                            ; Caixa pattern 1
+   :cai {:1 '[. . # .]                                            ; Caixa pattern 1
          }
-   :rep {:1 '[! _ _ _]                                            ; Repinique pattern 1
+   :rep {:1 '[# _ _ _]                                            ; Repinique pattern 1
 
                                                                   ; Repinique pattern 2:
-         :2 '[! ! _ _ | _ _ _ _ | ! _ ! _ | _ _ _ _               ; First time round
-              ! ! _ _ | _ _ _ _ | 6 ! . . 4 ! _ | 6 ! . . 4 ! _
-              ! ! _ _ | _ _ _ _ | ! _ ! _ | _ _ _ _
-              ! ! _ _ | _ _ _ _ | 3 ! ! ! | 4 ! _ _ _             ; <- has three-time
+         :2 '[# # _ _ | _ _ _ _ | # _ # _ | _ _ _ _               ; First time round
+              # # _ _ | _ _ _ _ | 6 # . . 4 # _ | 6 # . . 4 # _
+              # # _ _ | _ _ _ _ | # _ # _ | _ _ _ _
+              # # _ _ | _ _ _ _ | 3 # # # | 4 # _ _ _             ; <- has three-time
 
-              ! ! _ _ | _ _ _ _ | ! _ ! _ | _ _ _ _               ; Second time round
-              ! ! _ _ | _ _ _ _ | 6 ! . . 4 ! _ | 6 ! . . 4 ! _
-              ! ! _ _ | _ _ _ _ | ! _ ! _ | _ _ _ _
-              ! ! _ _ | _ _ _ _ | ! _ ! _ | ! _ ! _               ; <- has half-time
+              # # _ _ | _ _ _ _ | # _ # _ | _ _ _ _               ; Second time round
+              # # _ _ | _ _ _ _ | 6 # . . 4 # _ | 6 # . . 4 # _
+              # # _ _ | _ _ _ _ | # _ # _ | _ _ _ _
+              # # _ _ | _ _ _ _ | # _ # _ | # _ # _               ; <- has half-time
               ]
          }
-   :agg {:1 '[! ! _ . | _ . . _ | ! _ ! _ | . _ . _ ]             ; Agogo bells, pattern 1
+   :agg {:1 '[# # _ . | _ . . _ | # _ # _ | . _ . _ ]             ; Agogo bells, pattern 1
                                                                   ; Horrendous ear-worm
          }
    })
 
 (def break-one                                                    ; BREAK ONE
   [                                                               ; Part one:
-   {:agg  '[! ! _ . | _ . . _ | ! _ ! _ | . _ . _ ]               ;  Just Agogo bells (like pattern 1)
+   {:agg  '[# # _ . | _ . . _ | # _ # _ | . _ . _ ]               ;  Just Agogo bells (like pattern 1)
     }
                                                                   ; Part two:
-   {:agg  '[! ! _ . | _ . . _ | ! _ ! _ | . _ . _ ]               ;   Bells keep going
-    drums '[_       | _       | ! _ ! _ | ! _ ! _ ]}              ;   Drums play along with last 4
+   {:agg  '[# # _ . | _ . . _ | # _ # _ | . _ . _ ]               ;   Bells keep going
+    drums '[_       | _       | # _ # _ | # _ # _ ]}              ;   Drums play along with last 4
    ])
 
 (def break-two                                                    ; BREAK TWO
@@ -45,11 +45,11 @@
 (def break-three                                                  ; BREAK THREE
   [{drums '[. _ . . | _ . . _ |                                   ; Da dada dada
             . _ . . | _ . . _ |                                   ; Da dada dada
-            . _ . . | _ . . _ | ! _ _ _ |                         ; Da dada dada DAK
+            . _ . . | _ . . _ | # _ _ _ |                         ; Da dada dada DAK
             _ |                                                   ; Wait a mo
             . _ . . | _ . . _ |                                   ; Da dada dada
             . _ . . | _ . . _ |                                   ; Da dada dada
-            . _ . . | _ . . _ | ! _ !  _ | ! _ ! _                ; Da dada dada DAK DAK DAK DAK
+            . _ . . | _ . . _ | # _ #  _ | # _ # _                ; Da dada dada DAK DAK DAK DAK
             ]
     :agg :continue}                                               ; And more bells at same time
    ])

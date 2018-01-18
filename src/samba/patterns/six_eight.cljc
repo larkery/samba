@@ -9,7 +9,7 @@
                                                              ; TODO: Can't remember thirds
    :s4 {:1 '[3 . . . | _ _ _ | _ _ _ | _ _ _]                ; Fourths, pattern 1
         }
-   :rep {:1 '[3 ! . ! | . ! ! | . ! . | ! ! . ]              ; Repinique, pattern 1
+   :rep {:1 '[3 # . # | . # # | . # . | # # . ]              ; Repinique, pattern 1
          }
    :cai {:1 '[3 . . .]                                       ; Caixa, pattern 1
          }
