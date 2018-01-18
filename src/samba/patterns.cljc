@@ -17,7 +17,7 @@
             skip :skip-bar}
            command]
         (cond
-          ('#{. _ # h} command)
+          ('#{. _ * h} command)
           (let [next-note (+ note (/ 1 time))
                 end-note (>= next-note 0.999)
                 ]
@@ -25,7 +25,7 @@
                             {:beat beat :time time :note note
                              :type (case command
                                      . :sound
-                                     # :accent
+                                     * :accent
                                      h :hand
                                      :rest)
                              })
