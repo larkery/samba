@@ -126,3 +126,7 @@ times."
    ;; cycle patterns to fit
 
    (into {})))
+
+
+(def surdos #{:s1 :s2 :s3 :s4})
+(def drums #{:s1 :s2 :s3 :s4 :cai :rep})

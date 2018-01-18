@@ -1,0 +1,113 @@
+#+TITLE: Samba Notes
+
+This is a simple drum machine written to help me keep track of what
+I've learned at Bristol Samba. It's done with clojurescript & reagent.
+
+* Pattern Syntax
+
+The patterns are all stored in [[./src/samba/patterns/][this folder]], organized by the piece.
+
+A single pattern is written as a list of symbols, like this:
+
+#+BEGIN_SRC cljs
+[ ! . . ! | . . ! . | . . ! . | ! . . . ]
+#+END_SRC
+
+This is son clave played hand to hand. The symbols used are:
+
+- ~[~ and ~]~ :: The beginning and end of the list
+- ~!~ :: An accented note
+- ~.~ :: A normal note
+- ~|~ :: A line to separate each beat.
+         You can leave these out but they make it easier to read.
+- Blank space :: Blank space is needed to separate the symbols
+
+There are a few other bits of syntax involved:
+
+- The ~_~ symbol denotes a rest
+- The ~h~ symbol denotes a tap on the drum with your hand
+- Numbers indicate a change in note length (not beat length though)
+
+In the pattern there is always a /note length/.
+This says how many notes fit into a beat.
+It always starts off at 4, so every symbol (except ~|~) is 1/4 beat, or a sixteenth in 4/4.
+
+Writing a number in the pattern changes this, e.g.
+
+#+BEGIN_SRC cljs
+[ . . . . | 3 . . . | . . . | 4 . . . . ]
+#+END_SRC
+
+Is four sixteenths, two triplets, and four sixteenths.
+From the 3 to the following 4, each symbol means 1/3 of a beat.
+Similarly,
+
+#+BEGIN_SRC cljs
+[ 6 . . . 4 . . ]
+#+END_SRC
+
+Denotes one beat with a fast triplet and two sixteenths in it (dagada dak dak!).
+
+* Break Syntax
+
+Breaks are a little bit more complicated.
+The program sees a break as a list of steps, in which a step says a pattern for each instrument.
+This is written like:
+
+#+BEGIN_SRC cljs
+[ {:s1 A :s2 B :rep C}
+  {:rep C :cai D}
+]
+#+END_SRC
+
+This would mean a break with two steps.
+In the first step, surdos 1 and 2 play patterns A and B, and the repinique plays C.
+Nobody else plays anything.
+Then when the first step's patterns finish, the repinique keeps on C, the caixa plays D, and everyone else goes quiet.
+
+When all the steps in a break finish, the program goes back to whatever patterns it was playing before.
+
+This is less complicated than what we do in real life.
+
+There is one special symbol here, which is ~:continue~.
+If an instrument is given the pattern ~:continue~ instead of a normal pattern, it plays whatever pattern it was playing before the break started.
+
+* Producing a built artefact
+
+#+BEGIN_SRC sh
+$ lein cljsbuild once min
+#+END_SRC
+
+* Useful parts
+
+If you're interested in drum synthesis with web audio in
+clojurescript, look at src/samba/patch.cljs and
+src/samba/instruments.cljs.
+
+samba.patch contains wrappers around web audio for building
+synthesizer graphs, and samba.instruments uses samba.patch to make
+some different drum sounds. The bass drum sounds are following the
+sound-on-sound bass drum FM synthesis, which you can read at
+https://github.com/micjamking/synth-secrets/.
+
+The other drums are mostly resynthesized by spectral analysis of
+recordings I took.
+
+Things I've noticed in building this are mostly:
+
+- Web audio falls apart anywhere if you create the audio graph for
+  each instrument anew when you play it, but on desktop it's OK
+  if you keep a complex graph hanging about and reshape some envelopes
+  when you want to play a note.
+- However, web audio falls apart on mobile if your audio graph is really
+  complicated and you do this.
+- You can get round this by recording the sound of your synthesised drums
+  with OfflineAudioContext.
+- Web Audio on iOS has some stuff to prevent sound being produced
+  outside of user interaction; this even seems to break things like using
+  OfflineAudioContext to record sounds, so my thing doesn't work on iOS.
+- Reagent/React are suprisingly quick.
+
+The sound sequencing happens in samba.sequencer, which uses setTimeout
+slightly ahead of time to schedule notes with higher precision than
+setTimeout can do on its own.

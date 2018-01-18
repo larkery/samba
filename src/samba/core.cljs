@@ -1,19 +1,21 @@
 (ns samba.core
   (:require [reagent.core :as reagent]
-            [samba.patterns :as pat]
             [clojure.string :as string]
             [samba.grid :as grid]
             [samba.sequencer :as sq]
             [samba.patch :as patch]
             [samba.instruments :as instruments]
+            [samba.patterns :as patterns]
+            [samba.patterns.samba-reggae :as samba-reggae]
+            [samba.patterns.samba-funk :as samba-funk]
+            [samba.patterns.six-eight :as six-eight]
+            [samba.patterns.aforxe :as aforxe]
+            [samba.patterns.baiao :as baiao]
             ))
 
 (enable-console-print!)
 
 (defn on-js-reload [])
-
-(def surdos #{:s1 :s2 :s3 :s4})
-(def drums #{:s1 :s2 :s3 :s4 :cai :rep})
 
 (let [labels-map {:s1 "1st"
                   :s2 "2nd"
@@ -24,8 +26,8 @@
                   :agg "Agogo"
                   :mes "Mestre"
 
-                  drums "All drums"
-                  surdos "Surdos"
+                  patterns/drums "All drums"
+                  patterns/surdos "Surdos"
                   }]
   (defn instrument-labels [k]
     (or (labels-map k)
@@ -164,199 +166,25 @@
        ]
 
       :reggae-patterns
-      [dl
-       ;; patterns
-       {:s1  {:1 '[_ _ _ _ | . _ _ _ ]}
-        :s2  {:1 '[. _ _ _ | _ _ _ _ ]}
-        :s3  {:1 '[. _ _ _ | _ _ _ _ | . . . . | . . . . |
-                   . _ _ _ | _ _ _ _ | _ _ _ _ | . . . .]
-              }
-        :s4  {:1  '[. _ _ _ | . _ ! _ | . _ _ _ | . ! _ !]
-              :2  '[_ _ _ _ | _ . . _ ]
-              }
-        :rep {:1 '[! . . ! | . . ! . | . . ! . | . ! . .]
-              ;;              :3 '[! . . ! | . . ! . | . . ! . | ! . . .]  this is son clave which we do not use here
-              :3 '[! . . ! | . . ! . | ! . . ! | . . ! .]
-              :5 '[! . . ! | . . . ! | . . ! . | ! . . .]
-              }
-        :cai {:1 '[. . ! .]}
-        }
-
-       ;; breaks
-       {:1
-        [
-         {:mes '[6 . . . 4 . . | . _ 6 . . . 4 . . . _ ]}
-         {drums '[ . . . . | _ |]}
-         {:mes '[6 . . . 4 . . | . _ 6 . . . 4 . . . _ ]}
-         {drums '[ . . . . ]}
-         ]
-        :2
-        [{drums
-          '[. . _ . | _ . _ . | _ . _ . | _ . _ . ]
-          }]
-
-        "'Horizontal Sticks'"
-        [{surdos
-          '[! | _ | _ | _ |
-            ! | _ | _ | _ |
-
-            ! _ _ ! | _ _ ! _ | _ _ ! _ | ! _ ! !
-
-            | | | | |
-
-            3 . . . . . . . . . . . .
-            ]
-          :rep :continue
-          :cai :continue
-          }
-
-         ]
-
-        :4
-        [{#{:s1 :s2 :s3 :s4 :rep}
-          '[. . _ _ | _ _ . _ | . . _ _ | _ |
-            . . _ _ | . _ . _ | . . _ _ | _ |
-            . . _ _ | _ _ . _ | . . _ _ | _ |
-            . . _ _ | . _ . _ | . _ . _ ]
-          :cai :continue
-          }
-         {:s3 '[. . . .]}
-
-         ]
-        }
-
-
-       ]
+      [dl samba-reggae/patterns samba-reggae/breaks]
 
       :funk-patterns
-      [dl
-       {:s1 {:1 '[. _ _ _ | _ _ _ _ | . _ . _ | _ _ _ _]}
-        :s2 {:1 '[. _ _ _ | _ _ _ _ | . _ . _ | _ _ _ _]}
-        :s3 {:1 '[_ _ _ _ | _ _ _ _ | _ _ _ . | ! _ . _]}
-        :s4 {:1 '[. . . . | . _ _ _ | _ _ _ _ | _ _ _ _]}
-        :rep {:1? '[_ _ _ _ | !  _ . . | _ _ _ _ | ! _ _ _]} ;; TODO maybe wrong
-        :cai {:1 '[. . ! .]}}
-
-       {:1
-        [
-         {:rep    '[6 . . . _ _ . | . . _ _ . . | 4 ! _ ! _ ! _ ! !]
-          surdos  '[_ | _ |   ! _ ! _ ! _ _ _]
-          }
-         ;;  }
-
-         ]
-        }
-       ]
+      [dl samba-funk/patterns samba-funk/breaks]
 
       :six-eight-patterns
-      [dl
-       {:s1 {:1 '[3 _ _ _ | . _ _]}
-        :s2 {:1 '[3 . _ _ | _ _ _]}
-                                        ;      :s3 {}
-        :s4 {:1 '[3 . . . | _ _ _ | _ _ _ | _ _ _]}
-        :rep {:1 '[3 ! . ! | . ! ! | . ! . | ! ! . ]
-              }
-        :cai {:1 '[3 . . .]}
-        }
-       ]
+      [dl six-eight/patterns]
+
 
       :aforche-patterns
-      [dl
-       {surdos {:1 '[h h . _]
-                :2 '[h . . _]
-                :5 '[h h . _ | h h . _ | h h . h | . h . h]
-                }
-        :cai {:1 '[. . ! .]}
-        :rep {:1 '[! _ _ _]
-              :2 '[! ! _ _ | _ _ _ _ | ! _ ! _ | _ _ _ _
-                   ! ! _ _ | _ _ _ _ | 6 ! . . 4 ! _ | 6 ! . . 4 ! _
-                   ! ! _ _ | _ _ _ _ | ! _ ! _ | _ _ _ _
-                   ! ! _ _ | _ _ _ _ | 3 ! ! ! | 4 ! _ _ _
-
-                   ! ! _ _ | _ _ _ _ | ! _ ! _ | _ _ _ _
-                   ! ! _ _ | _ _ _ _ | 6 ! . . 4 ! _ | 6 ! . . 4 ! _
-                   ! ! _ _ | _ _ _ _ | ! _ ! _ | _ _ _ _
-                   ! ! _ _ | _ _ _ _ | ! _ ! _ | ! _ ! _
-                   ]
-              }
-        :agg {:1 '[! ! _ . | _ . . _ | ! _ ! _ | . _ . _ ]}
-        }
-
-       {"Break 1 (repeat x4)"
-        [{:agg '[! ! _ . | _ . . _ | ! _ ! _ | . _ . _ ]}
-         {:agg '[! ! _ . | _ . . _ | ! _ ! _ | . _ . _ ]
-          drums '[_ | _ | ! _ ! _ | ! _ ! _ ]}
-         ]
-        :2 [{drums '[. _ _ . | _ _ . _ | . _ _ . | _ _ . _ ]
-             :agg :continue
-             }]
-        :3
-        [{drums '[. _ . . | _ . . _ | . _ . . | _ . . _ | . _ . . | _ . . _ | ! _ _ _ | _ |
-                  . _ . . | _ . . _ | . _ . . | _ . . _ | . _ . . | _ . . _ | ! _ !  _ | ! _ ! _
-                  ]
-          :agg :continue}]
-        }
-
-       ]
+      [dl aforxe/patterns aforxe/breaks]
 
       ;; missing instruments:
       ;; triangle, shaker
       ;; shaker is basically shaped noise with a bandpass
       ;; triangle sounds ring modulated?
       :baiao
-      [dl
-       {:agg {:1 '[! _ _ _ | . _ _ _]
-              :2 '[_       | . _ . _ | _ ! _ ! | . _ . _]
-              }
+      [dl baiao/patterns baiao/breaks]
 
-        :cai {:1 '[! . . ! | . . ! . | . ! ! . | ! . ! .]}
-
-        :rep {:1 '[. . . . | ! . ! . | . ! . . | ! . ! . ]
-              :2 '[. . . . | ! . ! . | . ! . . | ! . ! ! ]}
-
-        :s4 {:1 '[h h . _]
-             :2 '[. _ _ _ | . _ ! _ | . _ _ _ | . _ ! !]
-             }
-
-        #{:s1 :s2 :s3}
-        {:1 '[. _ _ . | _ _ _ _ |  . . _ . | _ _ _ _]
-         :2 '[. _ _ _ | . _ _ _ | _ | _ ]}
-
-        ;;:tri {:1 '[. . ! .]} ;; I think there's an accent on the off-beat?
-
-        }
-       {"Break 1 (first time)"
-        [{:agg :continue
-          :cai :continue
-          :rep :continue
-          surdos
-          '[! _ _ _ | ! _ _ _ | _ _ _ _ | _ _ _ _ |
-            ! _ _ _ | ! _ _ _ | _ _ _ _ | _ _ _ _ |
-            ! _ _ _ | ! _ _ _ | _ _ _ _ | _ _ _ _ |
-            ! _ _ _ | ! _ _ _ | ! ! _ ! | _ ! ! _
-            ]
-          }]
-
-        "Break 1 (second time)"
-        [{:agg :continue
-          :cai :continue
-          (conj surdos :rep)
-          '[! _ _ _ | ! _ _ _ | _ _ _ _ | _ _ _ _ |
-            ! _ _ _ | ! _ _ _ | _ _ _ _ | _ _ _ _ |
-            ! _ _ _ | ! _ _ _ | _ _ _ _ | _ _ _ _ |
-            ! _ _ _ | ! _ _ _ | ! ! _ ! | _ ! ! _
-            ]
-          }]
-
-        "Sock puppet"
-        [{:agg '[! _ _ _ | . _ _ _ | ! _ _ _ | . _ _ _ ]}
-         {:agg '[! _ _ _ | . _ _ _ | ! _ _ _ | . _ _ _ ] :rep :continue}
-         {:agg '[! _ _ _ | . _ _ _ | ! _ _ _ | . _ _ _ ] :rep :continue :cai :continue}
-         {:agg '[! _ _ _ | . _ _ _ | ! _ _ _ | . _ _ _ ] :rep :continue :cai :continue :s4 :continue}
-         ]
-
-        }
-        ]
       })
 
 
