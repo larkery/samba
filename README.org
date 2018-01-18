@@ -20,13 +20,30 @@ This is son clave played hand to hand. The symbols used are:
 - ~.~ :: A normal note
 - ~|~ :: A line to separate each beat.
          You can leave these out but they make it easier to read.
+         If the remainder of a beat should all be rests you can just say ~|~ to end the beat and fill in the rests, so
+         #+BEGIN_SRC cljs
+         [ ! | ! | ]
+         #+END_SRC
+         Is just like a shorter way of writing
+         #+BEGIN_SRC cljs
+         [ ! _ _ _ | ! _ _ _ ]
+         #+END_SRC
 - Blank space :: Blank space is needed to separate the symbols
 
-There are a few other bits of syntax involved:
+There are two other note symbols that are used:
 
 - The ~_~ symbol denotes a rest
 - The ~h~ symbol denotes a tap on the drum with your hand
-- Numbers indicate a change in note length (not beat length though)
+
+So
+
+#+BEGIN_SRC cljs
+[ h h ! _ | h h ! _ ]
+#+END_SRC
+
+Is "tap tap Accent rest, tap tap Accent rest".
+
+Finally numbers indicate a change in note length (not beat length though)
 
 In the pattern there is always a /note length/.
 This says how many notes fit into a beat.
