@@ -18,8 +18,8 @@
         }
 
    #{:s1 :s2 :s3}                                            ; Other surdos
-   {:1 '[. _ _ . | _ _ _ _ |  . . _ . | _ _ _ _]             ;  Pattern 1
-    :2 '[. _ _ _ | . _ _ _ | _ | _ ]                         ; Pattern 2
+   {:1 '[. _ _ . | _ _ _ _ |  . . _ . | _ _ _ _]             ; Pattern 1
+    :2 '[. _ _ . | _ _ _ _ | _ | _ ]                         ; Pattern 2
     }
 
    ;; Missing triangle and shaker for now
@@ -35,10 +35,12 @@
     '[* _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |                ; TODO (should this be * _ _ *)
       * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |
       * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |
-      * _ _ * | _ _ _ _ | * * _ * | _ * * _                  ; And then have a twiddle at the end
+      * _ _ * | _ _ _ _ | * * _ * | _ _ _ _                  ; And then have a twiddle at the end
                                                              ; TODO not sure about my timing in this
       ]
-    }])
+    }
+   {:rep '[6 ! ! !]}
+   ])
 
 (def break-1-2nd                                             ; BREAK ONE (second go)
                                                              ; Same as above, except...
@@ -49,8 +51,19 @@
       * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |                ;      the repinique, unfortunately
       * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |
       * _ _ * | _ _ _ _ | * * _ * | _ * * _
-      ]
-    }])
+      ]}
+   {:rep '[6 ! ! !]}])
+
+(def break-1-last                                            ; BREAK ONE (second go)
+                                                             ; Same as above, except...
+  [{:agg :continue
+    :cai :continue
+    (conj surdos :rep)                                       ; the repinique joins the surdos
+    '[* _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |                ; TODO I am missing the twiddle for
+      * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |                ;      the repinique, unfortunately
+      * _ _ * | _ _ _ _ | _ _ _ _ | _ _ _ _ |
+      * _ _ * | _ _ _ _ | * * _ * | _ * * _
+      ]}])
 
 (def sock-puppet                                             ; SOCK PUPPET BREAK
   [{:agg '[* _ _ _ | . _ _ _ | * _ _ _ | . _ _ _ ]}          ; Just bells
@@ -67,4 +80,5 @@
 (def breaks
   {"Break 1 (first time)" break-1-1st
    "Break 1 (second time)" break-1-2nd
+   "Break 1 (final time)" break-1-last
    "Sock puppet" sock-puppet})

@@ -54,6 +54,16 @@
     :agg :continue}                                               ; And more bells at same time
    ])
 
+(def break-pointy-downy
+  [{#{:rep :cai}
+    '[ * . . * | . . * . | . . * . | * . . . ] ; son clave
+    ;; 4 bars of stuff
+    }
+   {:rep '[ * . . * | . . * . | . . * . | * . . . ]
+    ;; 8 bars of stuff
+    }
+   ])
+
 (def breaks
   {"Break 1 (repeat x4)" break-one
    :2 break-two
